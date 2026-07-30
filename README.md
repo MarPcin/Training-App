@@ -1,4 +1,4 @@
-# 💪 Training Plan — Push / Pull / Legs PWA
+# 💪 Training Plan — Push / Pull / Legs / Whole Body PWA
 
 A self-contained, offline-capable training tracker built as a single HTML file. No backend database, no account, no build step — just a Progressive Web App you add to your phone's Home Screen and use like a native app.
 
