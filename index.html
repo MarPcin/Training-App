@@ -78,6 +78,10 @@ tr[onclick]:active,.rl-row:active{
 
 /* ── AVATAR ── */
 .avatar-btn{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--border2);background:#3a3a3a;cursor:pointer;padding:0;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;position:absolute;left:50%;transform:translateX(-50%);top:50%;margin-top:-17px}
+/* the global button:active{transform:scale(.95)} rule would otherwise replace
+   translateX(-50%) entirely, un-centering the button on every tap — combine
+   both transforms explicitly here instead */
+.avatar-btn:active{transform:translateX(-50%) scale(.9)}
 .avatar-btn img{width:100%;height:100%;object-fit:cover;display:block}
 /* wrapper carries the edit badge; the inner circle does the clipping, so the
    badge is never cut off by the avatar's own overflow:hidden */
@@ -325,6 +329,21 @@ tr[onclick]:active,.rl-row:active{
 .overlay .sheet,.overlay .cal-sheet{transform:translateY(28px);transition:transform .34s cubic-bezier(.32,.72,0,1)}
 .overlay.show .sheet,.overlay.show .cal-sheet{transform:translateY(0)}
 .sheet{background:var(--bg3);border:1px solid var(--border2);border-radius:20px 20px 0 0;padding:1.5rem 1.25rem 2rem;width:100%;max-width:520px}
+
+/* ── ONBOARDING ── */
+#ov-onboarding{align-items:center;background:rgba(0,0,0,.92);z-index:500}
+.onb-card{background:var(--bg2);border:1px solid var(--border2);border-radius:20px;padding:1.6rem 1.4rem 1.3rem;width:100%;max-width:400px;margin:0 1.1rem;text-align:center;transform:none!important}
+.onb-visual{font-size:44px;line-height:1;margin-bottom:.9rem}
+.onb-title{font-size:19px;font-weight:800;color:var(--text);margin-bottom:.5rem;letter-spacing:-.2px}
+.onb-body{font-size:13px;color:var(--text2);line-height:1.65;margin-bottom:1.1rem}
+.onb-body strong{color:var(--text)}
+.onb-demo{background:var(--bg3);border:1px solid var(--border2);border-radius:12px;padding:.85rem;margin-bottom:1.1rem;text-align:left}
+.onb-dots{display:flex;justify-content:center;gap:6px;margin-bottom:1rem}
+.onb-dot{width:7px;height:7px;border-radius:50%;background:var(--border2);transition:all .25s}
+.onb-dot.active{background:var(--orange);width:20px;border-radius:999px}
+.onb-btns{display:flex;gap:8px}
+.onb-skip{flex:0 0 auto;padding:12px 16px;border-radius:10px;background:transparent;border:none;color:var(--text3);font-size:13px;font-weight:600;cursor:pointer}
+.onb-next{flex:1;padding:12px;border-radius:10px;background:var(--orange);border:none;color:#000;font-size:14px;font-weight:800;cursor:pointer}
 .sheet-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:.4rem}
 .sheet-sub{font-size:13px;color:var(--text2);margin-bottom:1.1rem;line-height:1.5}
 .sheet-ex{font-size:13px;font-weight:600;color:var(--orange);margin-bottom:1.1rem}
@@ -879,6 +898,12 @@ tr[onclick]:active,.rl-row:active{
       <button class="diet-seg-btn" onclick="setActivity(4)">4</button>
       <button class="diet-seg-btn" onclick="setActivity(5)">5</button>
       <button class="diet-seg-btn" onclick="setActivity(6)">6</button>
+    </div>
+    <div class="slabel">Daily Activity Level</div>
+    <div class="diet-seg" id="d-daily-activity">
+      <button class="diet-seg-btn active" onclick="setDailyActivity('low')">Low</button>
+      <button class="diet-seg-btn" onclick="setDailyActivity('medium')">Medium</button>
+      <button class="diet-seg-btn" onclick="setDailyActivity('high')">High</button>
     </div>
     <div class="slabel">Sex</div>
     <div class="diet-seg" id="d-sex">
@@ -1443,17 +1468,31 @@ tr[onclick]:active,.rl-row:active{
       <div class="avatar-large" id="profile-avatar-btn"></div>
       <div class="avatar-edit-badge">✏️</div>
     </div>
-    <div style="flex:1;padding-top:4px">
-      <div class="diet-label">Nickname</div>
-      <div style="position:relative">
-        <input class="diet-input" id="profile-nickname" type="text" placeholder="Enter a nickname" maxlength="24" style="padding-right:42px" onfocus="showNicknameConfirm()" onblur="hideNicknameConfirmDelayed()" onkeydown="if(event.key==='Enter'){confirmNickname();this.blur();}">
-        <button id="nickname-confirm-btn" onclick="confirmNickname()" aria-label="Confirm nickname" style="position:absolute;right:5px;top:50%;transform:translateY(-50%);width:27px;height:27px;border-radius:50%;background:var(--orange);border:none;color:#000;font-size:13px;font-weight:900;cursor:pointer;align-items:center;justify-content:center;padding:0;display:none">✓</button>
+    <div style="flex:1;padding-top:4px;min-width:0">
+      <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:6px;align-items:end">
+        <div style="min-width:0">
+          <div class="diet-label">Nickname</div>
+          <div style="position:relative">
+            <input class="diet-input" id="profile-nickname" type="text" placeholder="Nickname" maxlength="24" style="padding-right:36px;width:100%;box-sizing:border-box" onfocus="showNicknameConfirm()" onblur="hideNicknameConfirmDelayed()" onkeydown="if(event.key==='Enter'){confirmNickname();this.blur();}">
+            <button id="nickname-confirm-btn" onclick="confirmNickname()" aria-label="Confirm nickname" style="position:absolute;right:4px;top:50%;transform:translateY(-50%);width:24px;height:24px;border-radius:50%;background:var(--orange);border:none;color:#000;font-size:12px;font-weight:900;cursor:pointer;align-items:center;justify-content:center;padding:0;display:none">✓</button>
+          </div>
+        </div>
+        <div style="min-width:0">
+          <div class="diet-label">Age</div>
+          <input class="diet-input" id="profile-age" type="text" inputmode="numeric" placeholder="30" maxlength="3" style="width:100%;box-sizing:border-box" onkeydown="if(event.key==='Enter'){this.blur();}" onblur="confirmProfileAge()">
+        </div>
+        <div style="min-width:0">
+          <div class="diet-label">Height</div>
+          <input class="diet-input" id="profile-height" type="text" inputmode="numeric" placeholder="180" maxlength="3" style="width:100%;box-sizing:border-box" onkeydown="if(event.key==='Enter'){this.blur();}" onblur="confirmProfileHeight()">
+        </div>
       </div>
       <div id="nickname-saved-flash" style="font-size:10px;color:var(--green);font-weight:700;margin-top:4px;height:13px;opacity:0;transition:opacity .25s">✓ Saved</div>
       <div class="diet-label" style="margin-top:2px">Accent Color</div>
       <div id="accent-color-row" style="display:flex;flex-wrap:nowrap;gap:6px;margin-top:5px"></div>
     </div>
   </div>
+
+  <div id="profile-week-banner" style="margin-bottom:1.2rem"></div>
 
   <div class="slabel" style="margin-top:0">🎖️ Achievements</div>
   <div class="chart-card" style="margin-bottom:1.2rem">
@@ -1512,6 +1551,18 @@ tr[onclick]:active,.rl-row:active{
 </div>
 
 <!-- ══ OVERLAY: just-unlocked badge celebration ══ -->
+<!-- ══ OVERLAY: first-run onboarding ══ -->
+<div class="overlay" id="ov-onboarding">
+  <div class="onb-card">
+    <div id="onb-content"></div>
+    <div class="onb-dots" id="onb-dots"></div>
+    <div class="onb-btns">
+      <button class="onb-skip" onclick="finishOnboarding()" id="onb-skip-btn">Skip</button>
+      <button class="onb-next" onclick="onboardingNext()" id="onb-next-btn">Next</button>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="ov-badge-unlock">
   <div class="sheet" style="text-align:center">
     <div style="font-size:9px;font-weight:800;color:var(--orange);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Achievement Unlocked</div>
@@ -3200,6 +3251,7 @@ function doEditEx(){
 // ══════════════════════════════════════════
 let dietActivity=3;
 let dietSex='m';
+let dietDailyActivity='low';// non-training daily activity level — defaults to lowest
 
 // ══════════════════════════════════════════
 // DIET STATE PERSISTENCE + BODY STATS LINKAGE
@@ -3217,6 +3269,7 @@ function saveDietState(){
   d.diet.fat=getV('d-fat');
   d.diet.activity=dietActivity;
   d.diet.sex=dietSex;
+  d.diet.dailyActivity=dietDailyActivity;
   saveData(d);
 }
 
@@ -3231,7 +3284,16 @@ function loadDietState(){
     setV('d-fat',diet.fat);
     if(diet.activity)setActivity(diet.activity);
     if(diet.sex)setSex(diet.sex);
+    if(diet.dailyActivity)setDailyActivity(diet.dailyActivity);
   }
+  // first time ever opening Diet — seed age/height from Profile so they don't
+  // need to be typed in twice
+  const profile=getProfile();
+  const ageEl=document.getElementById('d-age');
+  const heightEl=document.getElementById('d-height');
+  if(ageEl&&!ageEl.value&&profile.age)ageEl.value=profile.age;
+  if(heightEl&&!heightEl.value&&profile.height)heightEl.value=profile.height;
+
   // first time ever opening Diet — seed weight/body fat straight from Body Stats
   // so nothing needs to be typed in twice
   const weightEmpty=!document.getElementById('d-weight')?.value;
@@ -3331,6 +3393,13 @@ function setActivity(n){
   });
   saveDietState();
 }
+function setDailyActivity(level){
+  dietDailyActivity=level;
+  document.querySelectorAll('#d-daily-activity .diet-seg-btn').forEach(b=>{
+    b.classList.toggle('active',b.getAttribute('onclick').includes(`'${level}'`));
+  });
+  saveDietState();
+}
 function setSex(s){
   dietSex=s;
   document.querySelectorAll('#d-sex .diet-seg-btn').forEach(b=>{
@@ -3369,9 +3438,11 @@ function calcDiet(){
   const lbm=weight*(1-fat/100);
   const bmr=Math.round(370+21.6*lbm);
 
-  // Activity multipliers
+  // Activity multipliers — training frequency sets the base, daily activity
+  // level adds a small adjustment on top for non-training movement (NEAT)
   const actMult={2:1.375,3:1.55,4:1.65,5:1.725,6:1.9};
-  const mult=actMult[dietActivity]||1.55;
+  const dailyActivityAdd={low:0,medium:0.075,high:0.15};
+  const mult=(actMult[dietActivity]||1.55)+(dailyActivityAdd[dietDailyActivity]||0);
   const tdee=Math.round(bmr*mult);
 
   // Maintenance macros
@@ -3725,7 +3796,10 @@ function _hideTipsTimerBar(){
 // ══════════════════════════════════════════
 function openOv(id){document.getElementById(id).classList.add('show')}
 function closeOv(id){document.getElementById(id).classList.remove('show')}
-document.querySelectorAll('.overlay').forEach(ov=>{ov.addEventListener('click',e=>{if(e.target===ov)closeOv(ov.id)})});
+// backdrop tap closes an overlay — except onboarding, which must go through
+// finishOnboarding() so it's actually marked as seen rather than silently
+// reappearing on the next launch
+document.querySelectorAll('.overlay').forEach(ov=>{ov.addEventListener('click',e=>{if(e.target===ov&&ov.id!=='ov-onboarding')closeOv(ov.id)})});
 
 // iOS Safari only applies :active styles on tap if something on the page has a
 // touchstart listener — otherwise the press/bounce microinteraction never fires
@@ -4638,20 +4712,27 @@ function selectPhotoForSlot(entryId,side){
 // current app state (unlike e.g. SB/PB counts, which can be recomputed any time)
 function markCustomizedExercise(){
   const d=loadData();
-  if(!d.flags)d.flags={};
-  if(!d.flags.customizedExercise){d.flags.customizedExercise=true;saveData(d);checkBadges();}
+  d.customizedExerciseCount=(d.customizedExerciseCount||0)+1;
+  saveData(d);
+  checkBadges();
 }
 function markDataExported(){
   const d=loadData();
-  if(!d.flags)d.flags={};
-  if(!d.flags.dataExported){d.flags.dataExported=true;saveData(d);checkBadges();}
+  d.dataExportedCount=(d.dataExportedCount||0)+1;
+  saveData(d);
+  checkBadges();
 }
+function getCustomizedExerciseCount(){return loadData().customizedExerciseCount||0}
+function getDataExportedCount(){return loadData().dataExportedCount||0}
 function incrementTotalPlannedCount(){
   const d=loadData();
   d.totalPlannedCount=(d.totalPlannedCount||0)+1;
   saveData(d);
 }
 function getTotalPlannedCount(){return loadData().totalPlannedCount||0}
+// live snapshot — how many sessions are planned RIGHT NOW, unlike the
+// cumulative totalPlannedCount above which never decreases
+function getCurrentlyPlannedCount(){return Object.values(calLoad()).filter(e=>e.status==='planned').length}
 
 function incrementTotalRestsStarted(){
   const d=loadData();
@@ -4693,12 +4774,13 @@ function computeLongestWeekStreak(threshold){
   }
   return longest;
 }
-function hasComebackEver(){
+function hasComebackEver(minGapDays){
+  minGapDays=minGapDays||14;
   const entries=calLoad();
   const doneDates=Object.keys(entries).filter(k=>entries[k].status==='done'&&!entries[k].dietOnly).sort();
   for(let i=1;i<doneDates.length;i++){
     const gap=Math.round((new Date(doneDates[i]+'T12:00:00')-new Date(doneDates[i-1]+'T12:00:00'))/86400000);
-    if(gap>=14)return true;
+    if(gap>=minGapDays)return true;
   }
   return false;
 }
@@ -4797,6 +4879,29 @@ function maxCleanDaysInAnyYear(){
 
 function getTotalCleanDaysCount(){return getCleanDayDates().size}
 
+// counts how many full weekends (Saturday AND Sunday both marked 🥗 clean) have
+// ever happened — deduped by the weekend's Saturday date
+function getCleanWeekendCount(){
+  const clean=getCleanDayDates();
+  const checked=new Set();
+  let count=0;
+  clean.forEach(k=>{
+    const d=new Date(k+'T12:00:00');
+    const dow=d.getDay();// 0=Sun,6=Sat
+    if(dow!==6&&dow!==0)return;
+    const sat=new Date(d);
+    if(dow===0)sat.setDate(sat.getDate()-1);// on a Sunday — step back to its Saturday
+    const satKey=calDateKey(sat);
+    if(checked.has(satKey))return;
+    checked.add(satKey);
+    const sun=new Date(sat);
+    sun.setDate(sun.getDate()+1);
+    const sunKey=calDateKey(sun);
+    if(clean.has(satKey)&&clean.has(sunKey))count++;
+  });
+  return count;
+}
+
 function renderDashCleanDays(containerId){
   const container=document.getElementById(containerId||'dash-clean-days');
   if(!container)return;
@@ -4858,6 +4963,7 @@ const BADGES=[
   {id:'organizer',cat:'Planning',color:'purple',emoji:'📋',name:'Organizer',desc:'Plan 50 sessions in total, ever.',calc:()=>({current:getTotalPlannedCount(),target:50})},
   {id:'master_organizer',cat:'Planning',color:'purple',emoji:'🗃️',name:'Master Organizer',desc:'Plan 100 sessions in total, ever.',calc:()=>({current:getTotalPlannedCount(),target:100})},
   {id:'coordination_king',cat:'Planning',color:'purple',emoji:'👑',name:'Coordination King',desc:'Plan 250 sessions in total, ever.',calc:()=>({current:getTotalPlannedCount(),target:250})},
+  {id:'planned_12_at_once',cat:'Planning',color:'purple',emoji:'🗓️',name:'Big Picture',desc:'Have 12 sessions planned at the same time.',calc:()=>({current:getCurrentlyPlannedCount(),target:12})},
 
   {id:'first_record',cat:'Strength Milestones',color:'yellow',emoji:'⭐',name:'First Record',desc:'Set a second Season Best on an exercise you already had one for.',calc:()=>({current:Object.values(weights).some(w=>w&&w.sbHistory&&w.sbHistory.length>=2)?1:0,target:1})},
   {id:'personal_best',cat:'Strength Milestones',color:'green',emoji:'🏆',name:'Personal Best',desc:'Set a second Personal Best on an exercise you already had one for.',calc:()=>({current:Object.values(weights).some(w=>w&&w.pbHistory&&w.pbHistory.length>=2)?1:0,target:1})},
@@ -4867,12 +4973,14 @@ const BADGES=[
   {id:'bodyweight_bench',cat:'Strength Milestones',color:'green',emoji:'🏋️',name:'Bodyweight Bench',desc:'Bench Press LT reaches your logged bodyweight.',calc:()=>{const bw=getLatestBodyStatsEntry()?.weight,w=weights['bench-0'];return{current:(bw!=null&&w&&w.lt!=null&&w.lt>=bw)?1:0,target:1};}},
   {id:'double_bodyweight',cat:'Strength Milestones',color:'green',emoji:'🔗',name:'Double Bodyweight',desc:'Deadlift LT reaches 2× your logged bodyweight.',calc:()=>{const bw=getLatestBodyStatsEntry()?.weight,w=weights['dead-0'];return{current:(bw!=null&&w&&w.lt!=null&&w.lt>=bw*2)?1:0,target:1};}},
   {id:'double_trap_bodyweight',cat:'Strength Milestones',color:'green',emoji:'⛓️',name:'Double Trap Bodyweight',desc:'Trap Bar Deadlift LT reaches 2× your logged bodyweight.',calc:()=>{const bw=getLatestBodyStatsEntry()?.weight,w=weights['dead-2'];return{current:(bw!=null&&w&&w.lt!=null&&w.lt>=bw*2)?1:0,target:1};}},
+  {id:'leg_press_200',cat:'Strength Milestones',color:'green',emoji:'🦿',name:'Leg Day Legend',desc:'Leg Press LT reaches 200kg.',calc:()=>{const w=weights['lpress-0'];return{current:(w&&w.lt!=null)?Math.min(w.lt,200):0,target:200};}},
 
   {id:'rest_10',cat:'Perfect Rests',color:'blue',emoji:'⏱️',name:'Rest Rookie',desc:'Start your rest timer 10 times.',calc:()=>({current:getTotalRestsStarted(),target:10})},
   {id:'rest_100',cat:'Perfect Rests',color:'blue',emoji:'⏲️',name:'Rest Regular',desc:'Start your rest timer 100 times.',calc:()=>({current:getTotalRestsStarted(),target:100})},
   {id:'rest_500',cat:'Perfect Rests',color:'blue',emoji:'🕒',name:'Rest Veteran',desc:'Start your rest timer 500 times.',calc:()=>({current:getTotalRestsStarted(),target:500})},
   {id:'rest_1000',cat:'Perfect Rests',color:'blue',emoji:'⏳',name:'Rest Master',desc:'Start your rest timer 1,000 times.',calc:()=>({current:getTotalRestsStarted(),target:1000})},
   {id:'rest_2000',cat:'Perfect Rests',color:'blue',emoji:'🏆',name:'Rest Legend',desc:'Start your rest timer 2,000 times.',calc:()=>({current:getTotalRestsStarted(),target:2000})},
+  {id:'rest_4000',cat:'Perfect Rests',color:'blue',emoji:'💎',name:'Rest Immortal',desc:'Start your rest timer 4,000 times.',calc:()=>({current:getTotalRestsStarted(),target:4000})},
 
   {id:'deload_discipline',cat:'Discipline',color:'red',emoji:'🔻',name:'Deload Discipline',desc:'Log your first deload week.',calc:()=>({current:getDeloadCount(),target:1})},
   {id:'cycle_complete',cat:'Discipline',color:'red',emoji:'🔄',name:'Cycle Complete',desc:'3 deload weeks logged.',calc:()=>({current:getDeloadCount(),target:3})},
@@ -4880,7 +4988,8 @@ const BADGES=[
   {id:'deload_cycle_3',cat:'Discipline',color:'red',emoji:'♻️',name:'3rd Deload Cycle',desc:'7 deload weeks logged.',calc:()=>({current:getDeloadCount(),target:7})},
   {id:'deload_master',cat:'Discipline',color:'red',emoji:'🛡️',name:'Deload Master',desc:'10 deload weeks logged.',calc:()=>({current:getDeloadCount(),target:10})},
   {id:'deload_champion',cat:'Discipline',color:'red',emoji:'🏅',name:'Deload Champion',desc:'20 deload weeks logged.',calc:()=>({current:getDeloadCount(),target:20})},
-  {id:'comeback',cat:'Discipline',color:'red',emoji:'🙌',name:'The Comeback',desc:'Log a session after a 14+ day gap. Welcome back!',calc:()=>({current:hasComebackEver()?1:0,target:1})},
+  {id:'comeback_short',cat:'Discipline',color:'red',emoji:'👋',name:'Back At It',desc:'Log a session after a 7+ day gap. Welcome back!',calc:()=>({current:hasComebackEver(7)?1:0,target:1})},
+  {id:'comeback',cat:'Discipline',color:'red',emoji:'🙌',name:'The Comeback',desc:'Log a session after a 14+ day gap. Welcome back!',calc:()=>({current:hasComebackEver(14)?1:0,target:1})},
   {id:'perfect_week',cat:'Discipline',color:'purple',emoji:'📅',name:'Perfect Week',desc:'Complete every planned session in a single week.',calc:()=>({current:hasPerfectWeekEver()?1:0,target:1})},
 
   {id:'data_point_one',cat:'Body Tracking',color:'blue',emoji:'📏',name:'Data Point One',desc:'Log your first Body Stats entry.',calc:()=>({current:statsLoad().length,target:1})},
@@ -4893,10 +5002,18 @@ const BADGES=[
   {id:'bulk_lean',cat:'Body Tracking',color:'blue',emoji:'🔷',name:'Bulk Lean',desc:'Reach 77kg at ≤14% body fat.',calc:()=>({current:hasBodyStatsMilestone(77,14)?1:0,target:1})},
   {id:'athletic',cat:'Body Tracking',color:'blue',emoji:'🏅',name:'Athletic',desc:'Reach 75kg at ≤10% body fat.',calc:()=>({current:hasBodyStatsMilestone(75,10)?1:0,target:1})},
 
-  {id:'make_it_yours',cat:'Personalization',color:'orange',emoji:'🛠️',name:'Make It Yours',desc:'Edit or add your first custom exercise.',calc:()=>({current:loadData().flags?.customizedExercise?1:0,target:1})},
-  {id:'backed_up',cat:'Personalization',color:'orange',emoji:'💾',name:'Backed Up',desc:'Export your data for the first time.',calc:()=>({current:loadData().flags?.dataExported?1:0,target:1})},
+  {id:'make_it_yours',cat:'Personalization',color:'orange',emoji:'🛠️',name:'Make It Yours',desc:'Edit or add your first custom exercise.',calc:()=>({current:getCustomizedExerciseCount(),target:1})},
+  {id:'custom_5',cat:'Personalization',color:'orange',emoji:'🔧',name:'Getting Handy',desc:'Edit or add 5 custom exercises.',calc:()=>({current:getCustomizedExerciseCount(),target:5})},
+  {id:'custom_10',cat:'Personalization',color:'orange',emoji:'⚙️',name:'Tinkerer',desc:'Edit or add 10 custom exercises.',calc:()=>({current:getCustomizedExerciseCount(),target:10})},
+  {id:'custom_25',cat:'Personalization',color:'orange',emoji:'🧰',name:'Program Architect',desc:'Edit or add 25 custom exercises.',calc:()=>({current:getCustomizedExerciseCount(),target:25})},
+  {id:'custom_50',cat:'Personalization',color:'orange',emoji:'🏗️',name:'Master Builder',desc:'Edit or add 50 custom exercises.',calc:()=>({current:getCustomizedExerciseCount(),target:50})},
+  {id:'backed_up',cat:'Personalization',color:'orange',emoji:'💾',name:'Backed Up',desc:'Export your data for the first time.',calc:()=>({current:getDataExportedCount(),target:1})},
+  {id:'backed_up_10',cat:'Personalization',color:'orange',emoji:'🗄️',name:'Backup Habit',desc:'Export your data 10 times.',calc:()=>({current:getDataExportedCount(),target:10})},
   {id:'this_is_you',cat:'Personalization',color:'orange',emoji:'🖼️',name:'This Is You',desc:'Add a photo as your avatar for the first time.',calc:()=>({current:getProfile().avatarType==='photo'?1:0,target:1})},
   {id:'my_name_is',cat:'Personalization',color:'orange',emoji:'✍️',name:'My Name Is',desc:'Set your nickname for the first time.',calc:()=>({current:(getProfile().nickname||'').trim()?1:0,target:1})},
+  {id:'my_age_is',cat:'Personalization',color:'orange',emoji:'🎂',name:'Age Is Just a Number',desc:'Enter your age on your Profile for the first time.',calc:()=>({current:(getProfile().age||'').toString().trim()?1:0,target:1})},
+  {id:'my_height_is',cat:'Personalization',color:'orange',emoji:'📐',name:'Standing Tall',desc:'Enter your height on your Profile for the first time.',calc:()=>({current:(getProfile().height||'').toString().trim()?1:0,target:1})},
+  {id:'accent_changed',cat:'Personalization',color:'orange',emoji:'🎨',name:'Your True Colors',desc:'Change your Accent Color for the first time.',calc:()=>{const c=getProfile().accentColor;return{current:(c&&c!=='orange')?1:0,target:1};}},
 
   {id:'clean_3days',cat:'Clean Eating',color:'green',emoji:'🥗',name:'Clean Start',desc:'3 consecutive days without a cheat meal.',calc:()=>({current:computeLongestCleanStreak(),target:3})},
   {id:'clean_week',cat:'Clean Eating',color:'green',emoji:'📆',name:'Clean Week',desc:'7 consecutive days without a cheat meal.',calc:()=>({current:computeLongestCleanStreak(),target:7})},
@@ -4905,6 +5022,8 @@ const BADGES=[
   {id:'clean_month',cat:'Clean Eating',color:'green',emoji:'🗓️',name:'Clean Month',desc:'26 clean days within a single calendar month.',calc:()=>({current:maxCleanDaysInAnyMonth(),target:26})},
   {id:'clean_half_year',cat:'Clean Eating',color:'green',emoji:'🍃',name:'Clean Half-Year',desc:'144 clean days within a single half-year (Jan–Jun or Jul–Dec).',calc:()=>({current:maxCleanDaysInAnyHalfYear(),target:144})},
   {id:'clean_year',cat:'Clean Eating',color:'green',emoji:'🏆',name:'Clean Year',desc:'269 clean days within a single calendar year.',calc:()=>({current:maxCleanDaysInAnyYear(),target:269})},
+  {id:'clean_weekend',cat:'Clean Eating',color:'green',emoji:'🎉',name:'Clean Weekend',desc:'Both Saturday and Sunday clean in the same weekend.',calc:()=>({current:getCleanWeekendCount(),target:1})},
+  {id:'clean_weekend_10',cat:'Clean Eating',color:'green',emoji:'🥂',name:'Weekend Warrior',desc:'10 full clean weekends (Saturday and Sunday both clean).',calc:()=>({current:getCleanWeekendCount(),target:10})},
 ];
 
 let pendingBadgeCelebrations=[];
@@ -5087,6 +5206,7 @@ function saveAccentColor(id){
   saveProfile(profile);
   applyAccentColor(id);
   renderAccentColorRow();
+  checkBadges();
 }
 
 function loadAccentColor(){
@@ -5269,12 +5389,198 @@ function confirmNickname(){
   }
 }
 
+// Age and Height live on the profile so Diet can auto-fill from them — same
+// "confirm to save" idea as Nickname, just triggered by leaving the field
+// (or pressing Enter, which blurs it) rather than a separate visible button.
+function confirmProfileAge(){
+  const val=(document.getElementById('profile-age')?.value||'').trim();
+  const profile=getProfile();
+  profile.age=val;
+  saveProfile(profile);
+  checkBadges();
+}
+function confirmProfileHeight(){
+  const val=(document.getElementById('profile-height')?.value||'').trim();
+  const profile=getProfile();
+  profile.height=val;
+  saveProfile(profile);
+  checkBadges();
+}
+
+// ══════════════════════════════════════════
+// PROFILE WEEK BANNER — a read-only snapshot of the current calendar week,
+// tapped as a whole to jump to the Calendar tab. Individual days aren't
+// interactive here — this is a glance, not an editor.
+// ══════════════════════════════════════════
+function renderProfileWeekBanner(){
+  const container=document.getElementById('profile-week-banner');
+  if(!container)return;
+
+  const entries=calLoad();
+  const today=new Date();
+  const todayKey=calDateKey(today);
+  const monday=new Date(weekKeyOf(today)+'T12:00:00');
+  const dayLetters=['M','T','W','T','F','S','S'];
+
+  const cells=dayLetters.map((letter,i)=>{
+    const d=new Date(monday);
+    d.setDate(d.getDate()+i);
+    const key=calDateKey(d);
+    const isToday=key===todayKey;
+    const entry=entries[key];
+
+    let cellStyle=`background:var(--bg4);border:1.5px solid var(--border2);`;
+    let emojiHtml='';
+    let deloadMark='';
+    let cheatMealMark='';
+
+    if(entry){
+      let tc;
+      if(entry.dietOnly){
+        tc={bg:'rgba(34,197,94,.13)',border:'rgba(34,197,94,.45)',color:'#22c55e',emoji:''};
+      } else {
+        tc=TYPE_CAL[entry.type]||TYPE_CAL.other;
+      }
+      const isPlanned=entry.status==='planned';
+      const borderStyle=isPlanned?`1.5px dashed ${tc.border}`:`1.5px solid ${tc.border}`;
+      cellStyle=`background:${tc.bg};border:${borderStyle};`;
+      emojiHtml=tc.emoji?`<span style="font-size:9px;line-height:1">${tc.emoji}</span>`:'';
+      if(entry.deload)deloadMark=`<span style="position:absolute;top:0;right:1px;font-size:6px;line-height:1">🔻</span>`;
+      if(entry.noCheatMeal)cheatMealMark=`<span style="position:absolute;top:0;left:1px;font-size:6px;line-height:1">🥗</span>`;
+    }
+    if(isToday)cellStyle+='box-shadow:0 0 0 1.5px #fff;';
+
+    return`<div style="display:flex;flex-direction:column;align-items:center;gap:3px">
+      <div style="font-size:8px;color:${isToday?'var(--text)':'var(--text3)'};font-weight:700">${letter}</div>
+      <div style="width:100%;aspect-ratio:1;border-radius:8px;position:relative;display:flex;align-items:center;justify-content:center;${cellStyle}">
+        ${deloadMark}${cheatMealMark}${emojiHtml}
+      </div>
+    </div>`;
+  }).join('');
+
+  container.innerHTML=`<div class="chart-card" onclick="sw('cal')" style="cursor:pointer">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.7rem">
+      <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">📅 This Week</div>
+      <div style="font-size:12px;color:var(--text3)">›</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:5px">${cells}</div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════
+// ONBOARDING — shown once, on the very first launch.
+// Four screens, each anchored by a visual rather than a wall of text: what the
+// app is, how a session works, what gets tracked, and where to start.
+// ══════════════════════════════════════════
+const ONBOARDING_SCREENS=[
+  {
+    visual:'💪',
+    title:'Work it out',
+    body:'Your training, tracked properly. Four session types, every lift logged, and your progress charted over time — all stored right here on your phone.',
+    demo:`<div style="display:flex;gap:5px;justify-content:center">
+      <div style="flex:1;text-align:center;padding:8px 3px;border-radius:8px;background:rgba(255,107,0,.15);border:1px solid rgba(255,107,0,.4);font-size:10px;font-weight:700;color:#ff6b00">💪 Push</div>
+      <div style="flex:1;text-align:center;padding:8px 3px;border-radius:8px;background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.4);font-size:10px;font-weight:700;color:#3b82f6">🔙 Pull</div>
+      <div style="flex:1;text-align:center;padding:8px 3px;border-radius:8px;background:rgba(168,85,247,.15);border:1px solid rgba(168,85,247,.4);font-size:10px;font-weight:700;color:#a855f7">🦵 Legs</div>
+      <div style="flex:1;text-align:center;padding:8px 3px;border-radius:8px;background:rgba(234,179,8,.15);border:1px solid rgba(234,179,8,.4);font-size:10px;font-weight:700;color:#eab308">🏋️ Body</div>
+    </div>`
+  },
+  {
+    visual:'🏋️',
+    title:'A session, start to finish',
+    body:'Tap <strong>LT</strong> to log the weight you lifted. Hit <strong>⏱️</strong> to start your rest timer — it beeps even if you leave the app, and counts your sets as you go. Finish with <strong>💪 Done</strong>.',
+    demo:`<div style="display:flex;align-items:center;gap:6px;margin-bottom:7px">
+      <div style="padding:5px 9px;border-radius:7px;background:var(--bg4);border:1px solid var(--border2);font-size:11px;font-weight:700;color:var(--text)">LT 80 kg</div>
+      <div style="padding:5px 9px;border-radius:7px;background:var(--bg4);border:1px solid var(--border2);font-size:10px;color:var(--text3)">↑ Increase?</div>
+      <div style="font-size:12px;font-weight:800;color:var(--orange)">II</div>
+    </div>
+    <div style="font-size:10px;color:var(--text3);line-height:1.5">Swipe an exercise sideways to switch to an alternative. Tap <strong style="color:var(--text2)">💡 Tips</strong> for form guidance on every lift.</div>`
+  },
+  {
+    visual:'📈',
+    title:'Watch it add up',
+    body:'Every session lands in your <strong>calendar</strong>. Log measurements and photos in <strong>Body Stats</strong>. Then watch the charts fill in — strength, weight, consistency, and more.',
+    demo:`<div style="display:flex;gap:8px;align-items:flex-end;height:44px;justify-content:center;margin-bottom:7px">
+      <div style="width:15px;height:40%;background:#ff6b00;border-radius:3px"></div>
+      <div style="width:15px;height:60%;background:#ff6b00;border-radius:3px"></div>
+      <div style="width:15px;height:50%;background:#ff6b00;border-radius:3px"></div>
+      <div style="width:15px;height:80%;background:#ff6b00;border-radius:3px"></div>
+      <div style="width:15px;height:100%;background:#ff6b00;border-radius:3px"></div>
+    </div>
+    <div style="font-size:10px;color:var(--text3);text-align:center">Records, streaks and trends — tracked automatically.</div>`
+  },
+  {
+    visual:'🎖️',
+    title:'Ready when you are',
+    body:'Nearly 70 <strong>badges</strong> unlock as you train. Set up your profile whenever you like — or just head to a training day and log your first set.',
+    demo:`<div style="display:flex;gap:9px;justify-content:center">
+      <div style="width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;background:radial-gradient(circle at 35% 30%, #ffb066, #ff6b00 70%);box-shadow:0 0 0 1.5px #ff6b00">👟</div>
+      <div style="width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;background:radial-gradient(circle at 35% 30%, #7deba0, #22c55e 70%);box-shadow:0 0 0 1.5px #22c55e">🏆</div>
+      <div style="width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;background:var(--bg4);border:1.5px dashed var(--border2);opacity:.5;filter:grayscale(1)">🔥</div>
+      <div style="width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;background:var(--bg4);border:1.5px dashed var(--border2);opacity:.5;filter:grayscale(1)">💯</div>
+    </div>`
+  }
+];
+
+let onboardingStep=0;
+
+function shouldShowOnboarding(){
+  return !loadData().onboardingDone;
+}
+
+function startOnboarding(){
+  onboardingStep=0;
+  renderOnboarding();
+  openOv('ov-onboarding');
+}
+
+function renderOnboarding(){
+  const s=ONBOARDING_SCREENS[onboardingStep];
+  if(!s)return finishOnboarding();
+  const content=document.getElementById('onb-content');
+  if(content){
+    content.innerHTML=`
+      <div class="onb-visual">${s.visual}</div>
+      <div class="onb-title">${s.title}</div>
+      <div class="onb-body">${s.body}</div>
+      ${s.demo?`<div class="onb-demo">${s.demo}</div>`:''}`;
+  }
+  const dots=document.getElementById('onb-dots');
+  if(dots){
+    dots.innerHTML=ONBOARDING_SCREENS.map((_,i)=>
+      `<div class="onb-dot${i===onboardingStep?' active':''}"></div>`
+    ).join('');
+  }
+  const isLast=onboardingStep===ONBOARDING_SCREENS.length-1;
+  const nextBtn=document.getElementById('onb-next-btn');
+  if(nextBtn)nextBtn.textContent=isLast?'Get Started':'Next';
+  const skipBtn=document.getElementById('onb-skip-btn');
+  if(skipBtn)skipBtn.style.visibility=isLast?'hidden':'visible';
+}
+
+function onboardingNext(){
+  if(onboardingStep>=ONBOARDING_SCREENS.length-1)return finishOnboarding();
+  onboardingStep++;
+  renderOnboarding();
+}
+
+function finishOnboarding(){
+  const d=loadData();
+  d.onboardingDone=true;
+  saveData(d);
+  closeOv('ov-onboarding');
+}
+
 function profileInit(){
   const profile=getProfile();
   const nickEl=document.getElementById('profile-nickname');
   if(nickEl)nickEl.value=profile.nickname||'';
+  const ageEl=document.getElementById('profile-age');
+  if(ageEl)ageEl.value=profile.age||'';
+  const heightEl=document.getElementById('profile-height');
+  if(heightEl)heightEl.value=profile.height||'';
   refreshAvatarDisplays();
   renderAccentColorRow();
+  renderProfileWeekBanner();
   checkBadges();
 }
 
@@ -5493,8 +5799,8 @@ function renderTrainingPie(containerId){
         <circle cx="70" cy="70" r="${R}" fill="none" stroke="var(--green)" stroke-width="16"
           stroke-dasharray="${trainedLen.toFixed(1)} ${C.toFixed(1)}"
           stroke-linecap="round" transform="rotate(-90 70 70)"/>
-        <text x="70" y="66" font-size="22" font-weight="800" fill="var(--text)" text-anchor="middle">${Math.round(pct)}%</text>
-        <text x="70" y="82" font-size="9" fill="var(--text3)" text-anchor="middle">trained</text>
+        <text x="70" y="63" dominant-baseline="central" font-size="22" font-weight="800" fill="var(--text)" text-anchor="middle">${Math.round(pct)}%</text>
+        <text x="70" y="80" dominant-baseline="central" font-size="9" fill="var(--text3)" text-anchor="middle">trained</text>
       </svg>
       <div style="flex:1;min-width:0">
         <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">${trainedDays} of ${daysElapsed} days this year</div>
@@ -7246,6 +7552,8 @@ badgesBooting=true;
 checkBadges();
 badgesBooting=false;
 checkBodyStatsReminder();
+// first launch only — shown last so the app is fully rendered behind it
+if(shouldShowOnboarding())setTimeout(startOnboarding,300);
 renderDay('push');renderDay('pull');renderDay('legs');renderDay('all');
 Object.keys(weights).forEach(u=>refreshPillsEverywhere(u));
 requestWakeLock();
