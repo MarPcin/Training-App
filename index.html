@@ -81,7 +81,7 @@ tr[onclick]:active,.rl-row:active{
 /* the global button:active{transform:scale(.95)} rule would otherwise replace
    translateX(-50%) entirely, un-centering the button on every tap — combine
    both transforms explicitly here instead */
-.avatar-btn:active{transform:translateX(-50%) scale(.9)}
+.avatar-btn:active{transform:scale(.9)}
 .avatar-btn img{width:100%;height:100%;object-fit:cover;display:block}
 /* wrapper carries the edit badge; the inner circle does the clipping, so the
    badge is never cut off by the avatar's own overflow:hidden */
@@ -146,7 +146,7 @@ tr[onclick]:active,.rl-row:active{
   border-radius:10px;font-size:14px;font-weight:800;cursor:pointer;
   text-align:center;letter-spacing:.02em;border:1px solid;
 }
-.done-push{background:var(--orange-dim);color:var(--orange);border-color:var(--orange-border);}
+.done-push{background:rgba(255,107,0,.18);color:#ff6b00;border-color:rgba(255,107,0,.5);}
 .done-pull{background:var(--blue-dim);color:var(--blue);border-color:var(--blue-border);}
 .done-legs{background:var(--purple-dim);color:var(--purple);border-color:var(--purple-border);}
 .done-all{background:rgba(234,179,8,.12);color:var(--yellow);border-color:rgba(234,179,8,.3);}
@@ -344,6 +344,36 @@ tr[onclick]:active,.rl-row:active{
 .onb-btns{display:flex;gap:8px}
 .onb-skip{flex:0 0 auto;padding:12px 16px;border-radius:10px;background:transparent;border:none;color:var(--text3);font-size:13px;font-weight:600;cursor:pointer}
 .onb-next{flex:1;padding:12px;border-radius:10px;background:var(--orange);border:none;color:#000;font-size:14px;font-weight:800;cursor:pointer}
+
+/* ── POST-SESSION CARDIO CAROUSEL ── */
+.cardio-wrap{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:.8rem .7rem;margin:.8rem 0}
+.cardio-row-top{display:flex;align-items:center;gap:6px}
+.cardio-nav-btn{flex-shrink:0;width:26px;height:26px;border-radius:50%;background:var(--bg4);border:1px solid var(--border2);color:var(--text2);font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+.cardio-slide-viewport{flex:1;min-width:0;overflow:hidden}
+.cardio-slide{display:flex;align-items:center;gap:10px;touch-action:pan-y;transition:transform .22s ease,opacity .22s ease}
+.cardio-slide-ico{font-size:26px;flex-shrink:0}
+.cardio-slide-body{min-width:0;flex:1}
+.cardio-slide-title{font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cardio-slide-time{font-size:10px;color:var(--orange);font-weight:700;margin-left:4px}
+.cardio-slide-desc{font-size:10.5px;color:var(--text3);line-height:1.4;margin-top:1px}
+.cardio-dots{display:flex;justify-content:center;gap:4px;margin:.55rem 0}
+.cardio-dot{width:5px;height:5px;border-radius:50%;background:var(--border2)}
+.cardio-dot.active{background:var(--orange);width:14px;border-radius:999px}
+.cardio-actions{display:flex;gap:7px}
+.cardio-add-btn{flex:0 0 auto;padding:9px 11px;border-radius:9px;background:var(--bg4);border:1px solid var(--border2);color:var(--text2);font-size:11px;font-weight:700;cursor:pointer}
+.cardio-done-btn{flex:1;padding:9px 11px;border-radius:9px;background:var(--orange-dim);border:1px solid var(--orange-border);color:var(--orange);font-size:12px;font-weight:800;cursor:pointer}
+
+@keyframes runAcross{
+  from{transform:translateX(110vw)}
+  to{transform:translateX(-15vw)}
+}
+.runner-emoji{position:fixed;font-size:30px;z-index:9999;pointer-events:none;animation:runAcross linear forwards;will-change:transform}
+
+@keyframes trophyBurst{
+  from{transform:translate(-50%,-50%) rotate(var(--rot)) translateY(0) scale(1);opacity:1}
+  to{transform:translate(-50%,-50%) rotate(var(--rot)) translateY(-160px) scale(.3);opacity:0}
+}
+.trophy-particle{position:fixed;top:50%;left:50%;width:9px;height:9px;border-radius:2px;pointer-events:none;z-index:10001;animation:trophyBurst ease-out forwards;will-change:transform}
 .sheet-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:.4rem}
 .sheet-sub{font-size:13px;color:var(--text2);margin-bottom:1.1rem;line-height:1.5}
 .sheet-ex{font-size:13px;font-weight:600;color:var(--orange);margin-bottom:1.1rem}
@@ -373,6 +403,7 @@ tr[onclick]:active,.rl-row:active{
 .it-wrap{
   display:flex;flex-direction:column;align-items:center;
   padding:.75rem .5rem 1rem;gap:0;
+  position:relative;
 }
 .it-header-row{
   display:flex;align-items:center;
@@ -578,6 +609,9 @@ tr[onclick]:active,.rl-row:active{
 .cal-dow-row div{font-size:10px;font-weight:700;color:var(--text3);text-align:center;padding:4px 0;text-transform:uppercase;letter-spacing:.05em}
 .cal-dow-row .cal-weekend{color:var(--text3);opacity:.6}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-swipe-viewport{overflow:hidden}
+.cal-swipe-track{display:flex;width:300%;transform:translateX(-33.3333%)}
+.cal-swipe-track .cal-grid{width:33.3333%;flex-shrink:0;align-content:start}
 .cal-day{
   aspect-ratio:1;display:flex;flex-direction:column;align-items:center;
   justify-content:center;border-radius:50%;cursor:pointer;
@@ -613,8 +647,11 @@ tr[onclick]:active,.rl-row:active{
   background:var(--bg2);border-top:1px solid var(--border2);border-bottom:1px solid var(--border2);
   padding:8px 10px;position:relative;z-index:2;
   display:grid;grid-template-columns:48px 18px 26px 1fr 38px auto;gap:5px;align-items:center;
-  transition:transform .22s ease;touch-action:pan-y;will-change:transform;
+  transition:transform .22s ease,background .15s ease;touch-action:pan-y;will-change:transform;
 }
+.rl-row.rl-selectable{grid-template-columns:22px 48px 18px 26px 1fr 38px auto;cursor:pointer}
+.rl-row.rl-selected{background:var(--orange-dim)}
+.rl-select-check{font-size:14px;text-align:center}
 .rl-date{font-size:9px;color:var(--text3);line-height:1.3}
 .rl-emoji{font-size:14px;text-align:center}
 .rl-kind{font-size:9px;font-weight:800;text-align:center;padding:2px 3px;border-radius:4px}
@@ -624,6 +661,9 @@ tr[onclick]:active,.rl-row:active{
 .rl-type{text-align:center;min-width:0}
 .rl-weight{font-size:12px;font-weight:800;color:var(--text2);white-space:nowrap;text-align:right}
 .cal-swipe-actions{position:absolute;inset:0;display:flex;justify-content:space-between;align-items:stretch;z-index:1}
+/* wraps just the entry row + its swipe actions, so the details panel that sits
+   below is outside the absolutely-positioned action layer's coordinate space */
+.cal-swipe-row{position:relative;overflow:hidden}
 .cal-swipe-edit-bg{width:76px;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--text2);border-radius:var(--r) 0 0 var(--r)}
 .cal-swipe-delete-bg{width:76px;background:rgba(239,68,68,.18);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--red);border-radius:0 var(--r) var(--r) 0}
 .cal-entry-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:3px}
@@ -633,6 +673,11 @@ tr[onclick]:active,.rl-row:active{
 .cal-entry-date{font-size:11px;color:var(--text3);margin-bottom:2px}
 .cal-entry-type{font-size:13px;font-weight:600;color:var(--text)}
 .cal-entry-note{font-size:11px;color:var(--text2);margin-top:2px;word-break:break-word}
+.cal-details-slot{max-height:0;overflow:hidden;transition:max-height .28s ease}
+.cal-details-slot.open{max-height:60px}
+.cal-details-inner{padding:8px 14px 4px}
+.cal-details-btn{width:100%;padding:8px;border-radius:8px;background:var(--bg4);border:1px solid var(--border2);color:var(--orange);font-size:11px;font-weight:700;cursor:pointer}
+.cal-details-empty{font-size:11px;color:var(--text3);text-align:center;padding:6px 0}
 .cal-entry-del-btn{
   flex-shrink:0;align-self:center;
   background:transparent;border:1px solid var(--border2);
@@ -718,7 +763,11 @@ tr[onclick]:active,.rl-row:active{
     <div class="app-label">Training App</div>
     <div class="app-title">Work <span style="font-weight:400">it</span> out</div>
   </div>
-  <button class="avatar-btn" onclick="sw('profile')" id="header-avatar-btn"></button>
+  <div id="header-avatar-wrap" style="position:absolute;left:50%;transform:translateX(-50%);top:50%;margin-top:-17px;display:flex;align-items:center;gap:4px">
+    <span id="header-trophy-left" style="display:none;font-size:15px;line-height:1"></span>
+    <button class="avatar-btn" onclick="sw('profile')" id="header-avatar-btn" style="position:static;transform:none;margin-top:0"></button>
+    <span id="header-trophy-right" style="display:none;font-size:15px;line-height:1"></span>
+  </div>
   <div style="display:flex;gap:8px;flex-shrink:0;align-items:center">
     <button class="rules-btn" onclick="sw('dashboard')">🖼️ Dashboard</button>
   </div>
@@ -759,7 +808,7 @@ tr[onclick]:active,.rl-row:active{
     </div>
     <div id="exlist-push"></div>
   </div>
-  <div class="cardio-row"><span class="cardio-ico">🚶</span><div class="cardio-txt"><strong>After session: 25 min cardio</strong><br>Treadmill · elliptical · stationary bike · HR 100–115 bpm</div></div>
+  <div id="cardio-card-push"></div>
   <div class="tip"><strong>Order matters.</strong> Always start with the heaviest compound when fresh. OHP before laterals. Triceps and abs always last.</div>
   <div class="bottom-nav-slot" data-page="push" style="margin-top:1rem"></div>
 </div>
@@ -788,7 +837,7 @@ tr[onclick]:active,.rl-row:active{
     </div>
     <div id="exlist-pull"></div>
   </div>
-  <div class="cardio-row"><span class="cardio-ico">🚶</span><div class="cardio-txt"><strong>After session: 25 min cardio</strong><br>Treadmill · elliptical · bike · optional incline 3–5%</div></div>
+  <div id="cardio-card-pull"></div>
   <div class="tip"><strong>Deadlift always first.</strong> Face pull: light weight, full ROM. Do hanging leg raises at the bar right after pull-ups.</div>
   <div class="bottom-nav-slot" data-page="pull" style="margin-top:1rem"></div>
 </div>
@@ -817,7 +866,7 @@ tr[onclick]:active,.rl-row:active{
     </div>
     <div id="exlist-legs"></div>
   </div>
-  <div class="cardio-row"><span class="cardio-ico">🚶</span><div class="cardio-txt"><strong>After session: 25 min cardio</strong><br>After heavy legs, bike or elliptical is easier than treadmill</div></div>
+  <div id="cardio-card-legs"></div>
   <div class="tip"><strong>Superset bicep + tricep at the end.</strong> Calves: slow and full ROM beats heavy weight.</div>
   <div class="bottom-nav-slot" data-page="legs" style="margin-top:1rem"></div>
 </div>
@@ -872,7 +921,7 @@ tr[onclick]:active,.rl-row:active{
     </div>
     <div id="exlist-all"></div>
   </div>
-  <div class="cardio-row"><span class="cardio-ico">🚶</span><div class="cardio-txt"><strong>After session: 25 min cardio</strong><br>Treadmill · elliptical · stationary bike · HR 100–115 bpm</div></div>
+  <div id="cardio-card-all"></div>
   <div class="tip"><strong>Whole body approach.</strong> Every major muscle group hits once — compounds first when you're freshest. Keep rest periods moderate (90 sec) to stay within session time. Perfect as a maintenance session or when training only 1–2× per week.</div>
   <div class="bottom-nav-slot" data-page="all" style="margin-top:1rem"></div>
 </div>
@@ -1013,8 +1062,15 @@ tr[onclick]:active,.rl-row:active{
       <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div>
       <div class="cal-weekend">Sat</div><div class="cal-weekend">Sun</div>
     </div>
-    <!-- Calendar grid -->
-    <div class="cal-grid" id="cal-grid"></div>
+    <!-- Calendar grid — a 3-month swipeable track (prev/current/next), so a
+         drag reveals the neighbouring month in real time instead of jumping -->
+    <div class="cal-swipe-viewport" id="cal-swipe-viewport">
+      <div class="cal-swipe-track" id="cal-swipe-track">
+        <div class="cal-grid" id="cal-grid-prev"></div>
+        <div class="cal-grid" id="cal-grid"></div>
+        <div class="cal-grid" id="cal-grid-next"></div>
+      </div>
+    </div>
 
     <!-- History / planned list -->
     <div class="slabel" style="margin-top:1.2rem">This month — training log</div>
@@ -1372,6 +1428,8 @@ tr[onclick]:active,.rl-row:active{
 <!-- ══════════ ABOUT ══════════ -->
 <div id="p-about" class="panel" style="padding:1.1rem 1.1rem 0;max-width:680px;margin:0 auto">
 
+  <button class="diet-calc-btn" style="margin-bottom:1.2rem" onclick="startOnboarding()">👋 Replay Welcome Screens</button>
+
   <div class="slabel" style="margin-top:0">ℹ️ How to Use This App</div>
 
   <div class="slabel">💪 Training Tabs</div>
@@ -1494,6 +1552,9 @@ tr[onclick]:active,.rl-row:active{
 
   <div id="profile-week-banner" style="margin-bottom:1.2rem"></div>
 
+  <div class="slabel" style="margin-top:0">🎖️ Rank</div>
+  <div id="profile-rank-row" style="margin-bottom:1.2rem"></div>
+
   <div class="slabel" style="margin-top:0">🎖️ Achievements</div>
   <div class="chart-card" style="margin-bottom:1.2rem">
     <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.6rem">
@@ -1552,6 +1613,77 @@ tr[onclick]:active,.rl-row:active{
 
 <!-- ══ OVERLAY: just-unlocked badge celebration ══ -->
 <!-- ══ OVERLAY: first-run onboarding ══ -->
+<!-- ══ OVERLAY: add a cardio alternative ══ -->
+<!-- ══ OVERLAY: cardio completed blocked - no training logged today ══ -->
+<div class="overlay" id="ov-cardio-blocked">
+  <div class="sheet" style="position:relative">
+    <button onclick="closeOv('ov-cardio-blocked')" aria-label="Close" style="position:absolute;top:.9rem;right:.9rem;width:28px;height:28px;border-radius:50%;background:var(--bg4);border:1px solid var(--border2);color:var(--text2);font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2">✕</button>
+    <div class="sheet-title" style="padding-right:36px">No Training Logged Today</div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.65;margin-bottom:1.2rem">
+      You haven't done a strength training today. Adding post-workout cardio isn't possible. You can always add a Cardio workout instead.
+    </div>
+    <div class="sheet-btns">
+      <button class="btn-orange" onclick="openLogCardioTrainingToday()">🏃 Log Cardio Training</button>
+      <button class="btn-no" onclick="closeOv('ov-cardio-blocked')">Ok, got it 👌</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ OVERLAY: confirm cardio option deletion ══ -->
+<div class="overlay" id="ov-cardio-del">
+  <div class="sheet">
+    <div class="sheet-title">Delete this cardio option?</div>
+    <div class="sheet-sub" id="cardio-del-name">This cardio option will be removed from your list. Any past sessions already logged with it stay untouched.</div>
+    <div class="sheet-btns">
+      <button class="btn-yes" onclick="doDeleteCardioAlt()">Yes, Delete</button>
+      <button class="btn-no" onclick="closeOv('ov-cardio-del')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="ov-cardio-add">
+  <div class="sheet">
+    <div class="sheet-title" id="cardio-add-sheet-title">Add Cardio Alternative</div>
+    <div style="margin-bottom:1rem">
+      <label class="form-label">Emoji</label>
+      <input class="form-input" id="cardio-add-emoji" type="text" maxlength="4" placeholder="🚶" style="width:25vw;max-width:110px;box-sizing:border-box;text-align:center;font-size:20px">
+    </div>
+    <div style="margin-bottom:1rem">
+      <label class="form-label">Title (name the training phase it suits)</label>
+      <input class="form-input" id="cardio-add-title" type="text" maxlength="30" placeholder="e.g. Cut / Fat Loss" style="width:100%;box-sizing:border-box;text-align:left">
+    </div>
+    <div style="margin-bottom:1rem">
+      <label class="form-label">Duration</label>
+      <div style="position:relative;width:25vw;max-width:110px">
+        <input class="form-input" id="cardio-add-time" type="text" inputmode="numeric" maxlength="4" placeholder="25" style="width:100%;box-sizing:border-box;padding-right:34px" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+        <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--text3);font-weight:600;pointer-events:none">min</span>
+      </div>
+    </div>
+    <div style="margin-bottom:1rem">
+      <label class="form-label">Short description</label>
+      <textarea class="form-input" id="cardio-add-desc" rows="2" maxlength="120" placeholder="e.g. Treadmill or bike · HR 100–115 bpm" style="width:100%;box-sizing:border-box;resize:vertical;font-family:inherit"></textarea>
+    </div>
+    <div class="sheet-btns" style="margin-top:1rem">
+      <button class="btn-orange" id="cardio-add-save-btn" onclick="saveCardioAlt()">Add</button>
+      <button class="btn-no" onclick="closeOv('ov-cardio-add')">Cancel</button>
+    </div>
+    <button id="cardio-add-delete-btn" onclick="deleteCardioAlt()" style="display:none;width:100%;margin-top:.6rem;padding:9px;border-radius:9px;background:var(--red-dim);border:1px solid var(--red-border);color:var(--red);font-size:12px;font-weight:700;cursor:pointer">🗑 Delete This Option</button>
+  </div>
+</div>
+
+<style>#cardio-add-emoji::placeholder{opacity:.35}</style>
+
+<!-- ══ OVERLAY: rank trophy unlocked — center-screen, distinct from badge popup ══ -->
+<div class="overlay" id="ov-trophy-unlock" style="align-items:center;background:rgba(0,0,0,.92)">
+  <div class="onb-card" style="text-align:center">
+    <div style="font-size:12px;font-weight:800;letter-spacing:.15em;color:var(--orange);text-transform:uppercase;margin-bottom:.7rem">Rank Up!</div>
+    <div id="trophy-unlock-emoji" style="font-size:64px;line-height:1;margin-bottom:.9rem"></div>
+    <div id="trophy-unlock-title" style="font-size:21px;font-weight:800;color:var(--text);margin-bottom:.5rem"></div>
+    <div id="trophy-unlock-desc" style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:1.3rem"></div>
+    <button class="btn-orange" style="width:100%" onclick="closeOv('ov-trophy-unlock')">Awesome! 🎉</button>
+  </div>
+</div>
+
 <div class="overlay" id="ov-onboarding">
   <div class="onb-card">
     <div id="onb-content"></div>
@@ -1577,8 +1709,9 @@ tr[onclick]:active,.rl-row:active{
 
 <!-- ══ OVERLAY: calendar day ══ -->
 <div class="overlay" id="ov-cal">
-  <div class="cal-sheet">
-    <div class="cal-sheet-date" id="ov-cal-date">—</div>
+  <div class="cal-sheet" style="position:relative">
+    <button onclick="closeOv('ov-cal')" aria-label="Close" style="position:absolute;top:.9rem;right:.9rem;width:28px;height:28px;border-radius:50%;background:var(--bg4);border:1px solid var(--border2);color:var(--text2);font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2">✕</button>
+    <div class="cal-sheet-date" id="ov-cal-date" style="padding-right:36px">—</div>
     <div id="ov-cal-body">
       <!-- filled by JS depending on context -->
     </div>
@@ -1779,10 +1912,30 @@ tr[onclick]:active,.rl-row:active{
   <div class="sheet" style="max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;position:relative">
     <button onclick="closeOv('ov-record-log')" style="position:absolute;top:.9rem;right:.9rem;width:30px;height:30px;border-radius:50%;background:var(--bg4);border:1px solid var(--border2);color:var(--text2);font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2">✕</button>
     <div class="sheet-title" style="padding-right:38px">📜 SB &amp; PB Record Log</div>
+    <input class="form-input" id="record-log-search" type="text" placeholder="🔍 Search by exercise name" style="width:100%;box-sizing:border-box;margin-bottom:.6rem" oninput="recordLogOnSearch()">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="swipe-btn" onclick="recordLogToggleSelectMode()" id="record-log-select-toggle">☑️ Select</button>
+        <span id="record-log-select-all-btn" style="display:none;font-size:10px;color:var(--text3);cursor:pointer;text-decoration:underline" onclick="recordLogSelectAll()">Select all</span>
+      </div>
+      <button class="btn-yes" style="flex:none;padding:6px 12px;font-size:11px;display:none" onclick="recordLogAskBulkDelete()" id="record-log-delete-selected">🗑 Delete (0)</button>
+    </div>
     <div style="font-size:11px;color:var(--text3);margin-bottom:.8rem" id="record-log-count"></div>
     <div id="record-log-body"></div>
     <div id="record-log-nav" style="display:flex;align-items:center;justify-content:space-between;margin:.8rem 0"></div>
     <button class="btn-no" style="width:100%" onclick="closeOv('ov-record-log')">Close</button>
+  </div>
+</div>
+
+<!-- ══ OVERLAY: confirm bulk record deletion ══ -->
+<div class="overlay" id="ov-record-bulk-del">
+  <div class="sheet">
+    <div class="sheet-title">Delete Selected Records?</div>
+    <div class="sheet-sub" id="record-bulk-del-label">—</div>
+    <div class="sheet-btns">
+      <button class="btn-yes" onclick="doRecordBulkDelete()">Yes, Delete</button>
+      <button class="btn-no" onclick="closeOv('ov-record-bulk-del')">Cancel</button>
+    </div>
   </div>
 </div>
 
@@ -1842,7 +1995,7 @@ tr[onclick]:active,.rl-row:active{
   <div class="sheet" style="max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch">
     <div class="sheet-title" id="session-summary-title">Session Complete!</div>
     <div id="session-summary-body"></div>
-    <button class="btn-orange" style="width:100%" onclick="closeOv('ov-session-summary');showNextBadgeCelebration();">Nice! Close</button>
+    <button class="btn-orange" id="session-summary-close-btn" style="width:100%" onclick="closeOv('ov-session-summary');showNextBadgeCelebration();">Nice! Close</button>
   </div>
 </div>
 
@@ -2385,6 +2538,213 @@ function persistAll(){
 // ══════════════════════════════════════════
 // RENDER
 // ══════════════════════════════════════════
+// ══════════════════════════════════════════
+// POST-SESSION CARDIO CAROUSEL
+// One shared list of cardio options (like shared-abs) swipeable on every
+// training day tab — the same current selection shows everywhere at once.
+// ══════════════════════════════════════════
+const CARDIO_DAYS=['push','pull','legs','all'];
+let cardioSlidePos=0;
+
+function getCardioOptions(){
+  const d=loadData();
+  if(!d.cardioOptions||!d.cardioOptions.length){
+    d.cardioOptions=[
+      {emoji:'🚶',title:'Maintenance',time:'25 min',desc:'Treadmill, elliptical, or bike · steady HR 100–115 bpm'},
+      {emoji:'🏃',title:'Cut / Fat Loss',time:'30 min',desc:'Higher intensity steady-state · HR 130–145 bpm'},
+      {emoji:'🚴',title:'Bulk Phase',time:'15 min',desc:'Easy pace, just enough for heart health · HR 100–110 bpm'},
+    ];
+    saveData(d);
+  }
+  return d.cardioOptions;
+}
+
+function saveCardioOptions(opts){
+  const d=loadData();
+  d.cardioOptions=opts;
+  saveData(d);
+}
+
+function renderAllCardioCards(){
+  const opts=getCardioOptions();
+  if(cardioSlidePos>=opts.length)cardioSlidePos=Math.max(0,opts.length-1);
+  CARDIO_DAYS.forEach(day=>renderCardioCard(day,opts));
+}
+
+function renderCardioCard(day,opts){
+  const container=document.getElementById('cardio-card-'+day);
+  if(!container)return;
+  opts=opts||getCardioOptions();
+  if(!opts.length){
+    container.innerHTML=`<div class="cardio-wrap" style="padding:0">
+      <button onclick="openCardioAddForm()" style="width:100%;padding:1.1rem;border-radius:10px;background:none;border:none;color:var(--orange);font-size:13px;font-weight:800;cursor:pointer">＋ Add after-training cardio</button>
+    </div>`;
+    return;
+  }
+  const cur=opts[cardioSlidePos];
+  const dots=opts.map((_,i)=>`<span class="cardio-dot${i===cardioSlidePos?' active':''}"></span>`).join('');
+  container.innerHTML=`<div class="cardio-wrap">
+    <div class="cardio-row-top">
+      <button class="cardio-nav-btn" onclick="cardioShift(-1)" ${opts.length<2?'style="visibility:hidden"':''}>‹</button>
+      <div class="cardio-slide-viewport">
+        <div class="cardio-slide" id="cardio-slide-${day}">
+          <span class="cardio-slide-ico">${cur.emoji}</span>
+          <div class="cardio-slide-body">
+            <span class="cardio-slide-title">${cur.title}</span><span class="cardio-slide-time">${cur.time}</span>
+            <div class="cardio-slide-desc">${cur.desc}</div>
+          </div>
+        </div>
+      </div>
+      <button class="cardio-nav-btn" onclick="cardioShift(1)" ${opts.length<2?'style="visibility:hidden"':''}>›</button>
+    </div>
+    ${opts.length>1?`<div class="cardio-dots">${dots}</div>`:''}
+    <div class="cardio-actions">
+      <button class="cardio-add-btn" onclick="openCardioAddForm()">＋ Add</button>
+      <button class="cardio-add-btn" onclick="openCardioAddForm(cardioSlidePos)">✏️ Edit</button>
+      <button class="cardio-done-btn" onclick="markCardioCompleted()">🏃 Cardio Completed</button>
+    </div>
+  </div>`;
+  attachCardioSwipe(day);
+}
+
+function cardioShift(delta){
+  const opts=getCardioOptions();
+  if(!opts.length)return;
+  cardioSlidePos=(cardioSlidePos+delta+opts.length)%opts.length;
+  renderAllCardioCards();
+}
+
+function attachCardioSwipe(day){
+  const el=document.getElementById('cardio-slide-'+day);
+  if(!el||el._swipeAttached)return;
+  el._swipeAttached=true;
+  let sx=0,sy=0;
+  el.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});
+  el.addEventListener('touchend',e=>{
+    const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;
+    if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>40){
+      cardioShift(dx>0?-1:1);
+    }
+  },{passive:true});
+}
+
+let cardioEditIndex=null;// null = adding new; a number = editing that option's index
+
+function openCardioAddForm(editIndex){
+  const opts=getCardioOptions();
+  const isEdit=editIndex!=null&&opts[editIndex];
+  cardioEditIndex=isEdit?editIndex:null;
+  const opt=isEdit?opts[editIndex]:null;
+  document.getElementById('cardio-add-emoji').value=opt?opt.emoji:'';
+  document.getElementById('cardio-add-title').value=opt?opt.title:'';
+  document.getElementById('cardio-add-time').value=opt?(parseInt(opt.time)||''):'';
+  document.getElementById('cardio-add-desc').value=opt?opt.desc:'';
+  document.getElementById('cardio-add-sheet-title').textContent=isEdit?'Edit Cardio Alternative':'Add Cardio Alternative';
+  document.getElementById('cardio-add-save-btn').textContent=isEdit?'Save':'Add';
+  const delBtn=document.getElementById('cardio-add-delete-btn');
+  if(delBtn)delBtn.style.display=isEdit?'block':'none';
+  openOv('ov-cardio-add');
+}
+
+function saveCardioAlt(){
+  const emoji=(document.getElementById('cardio-add-emoji').value||'🏃').trim()||'🏃';
+  const title=(document.getElementById('cardio-add-title').value||'').trim();
+  const timeNum=(document.getElementById('cardio-add-time').value||'').trim();
+  const desc=(document.getElementById('cardio-add-desc').value||'').trim();
+  if(!title){document.getElementById('cardio-add-title').focus();return}
+  const time=timeNum?(timeNum+' min'):'—';
+  const opts=getCardioOptions();
+  if(cardioEditIndex!=null&&opts[cardioEditIndex]){
+    opts[cardioEditIndex]={emoji,title,time,desc:desc||''};
+    cardioSlidePos=cardioEditIndex;
+  } else {
+    opts.push({emoji,title,time,desc:desc||''});
+    cardioSlidePos=opts.length-1;// jump to the newly added option
+  }
+  saveCardioOptions(opts);
+  renderAllCardioCards();
+  closeOv('ov-cardio-add');
+}
+
+let cardioPendingDelete=null;// index awaiting delete confirmation
+
+function deleteCardioAlt(){
+  if(cardioEditIndex==null)return;
+  const opts=getCardioOptions();
+  const opt=opts[cardioEditIndex];
+  if(!opt)return;
+  // remembered separately, because closing the edit sheet clears cardioEditIndex
+  cardioPendingDelete=cardioEditIndex;
+  const nameEl=document.getElementById('cardio-del-name');
+  if(nameEl)nameEl.textContent=`"${opt.emoji} ${opt.title}" will be removed from your cardio options. Any past sessions already logged with it stay untouched.`;
+  closeOv('ov-cardio-add');
+  setTimeout(()=>openOv('ov-cardio-del'),120);
+}
+
+function doDeleteCardioAlt(){
+  if(cardioPendingDelete==null)return;
+  const opts=getCardioOptions();
+  opts.splice(cardioPendingDelete,1);
+  saveCardioOptions(opts);
+  cardioSlidePos=Math.max(0,Math.min(cardioSlidePos,opts.length-1));
+  cardioPendingDelete=null;
+  cardioEditIndex=null;
+  renderAllCardioCards();
+  closeOv('ov-cardio-del');
+}
+
+// multiple 🏃 float across the screen right-to-left, staggered
+function launchRunners(){
+  const count=7;
+  for(let i=0;i<count;i++){
+    const el=document.createElement('div');
+    el.className='runner-emoji';
+    el.textContent='🏃';
+    el.style.top=(12+Math.random()*66)+'vh';
+    el.style.animationDuration=(1.1+Math.random()*0.7)+'s';
+    el.style.animationDelay=(i*0.11)+'s';
+    document.body.appendChild(el);
+    el.addEventListener('animationend',()=>el.remove());
+  }
+}
+
+function getTotalCardioCompleted(){return loadData().totalCardioCompleted||0}
+function incrementTotalCardioCompleted(){
+  const d=loadData();
+  d.totalCardioCompleted=(d.totalCardioCompleted||0)+1;
+  saveData(d);
+}
+
+// marks today with the currently-selected cardio option — attaches to today's
+// existing calendar entry if there is one, or creates a minimal placeholder
+// (excluded from training-day statistics, same mechanism as a diet-only day)
+function markCardioCompleted(){
+  const key=todayISO();
+  const entries=calLoad();
+  const today=entries[key];
+  const hasRealTrainingToday=!!(today&&today.status==='done'&&today.type&&!today.dietOnly);
+  if(!hasRealTrainingToday){
+    openOv('ov-cardio-blocked');
+    return;
+  }
+  const opts=getCardioOptions();
+  const cur=opts[cardioSlidePos];
+  if(!cur)return;
+  entries[key].cardio={emoji:cur.emoji,title:cur.title,time:cur.time};
+  calSave(entries);
+  incrementTotalCardioCompleted();
+  launchRunners();
+  checkBadges();
+  renderCal();
+}
+
+// opens today's calendar entry form with "Cardio" pre-selected as the type —
+// the escape hatch offered from the blocked-cardio popup
+function openLogCardioTrainingToday(){
+  closeOv('ov-cardio-blocked');
+  calOpenFormDirect(todayISO(),false,'cardio','',false,false,false);
+}
+
 function renderDay(day){
   const container=document.getElementById('exlist-'+day);
   if(!container)return;
@@ -3077,7 +3437,9 @@ function renderWbPickerList(){
   let html='';
   ['push','pull','legs'].forEach(d=>{
     const meta=WB_DAY_META[d];
-    const rows=(exercises[d]||[]).flatMap(g=>
+    // Abs is shared/level-7 and handled on its own — it links automatically to
+    // every day rather than being picked individually, so it's excluded here
+    const rows=(exercises[d]||[]).filter(g=>g.id!==SHARED_ABS_ID).flatMap(g=>
       (g.alts||[]).map((alt,altIdx)=>{
         const safeName=alt.name.replace(/'/g,"\\'").replace(/"/g,'&quot;');
         return`<div class="wb-picker-row" onclick="wbPickerSelect('${d}','${g.id}',${altIdx})">
@@ -3555,6 +3917,7 @@ const activeTimers={};
 // ══════════════════════════════════════════
 let setCounterU=null;// which exercise DOM uid currently owns the counter
 let setCounterValue=0;// how many timers have been started for it
+let setCounterTimerActive=false;// true while THIS press's timer is still counting down
 
 const ROMAN=['','I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV','XVI','XVII','XVIII','XIX','XX'];
 function toRoman(n){
@@ -3580,21 +3943,25 @@ function bumpSetCounter(u){
     setCounterValue=0;
   }
   setCounterValue++;
+  setCounterTimerActive=true;// this press's timer is now counting down
   renderSetCounter();
 }
 
 function renderSetCounter(){
   clearAllSetCounters();
   if(!setCounterU||setCounterValue<1)return;
-  // the next set is the one after the sets already completed
-  const label=toRoman(setCounterValue+1);
+  // while the timer is still counting down: "I DONE" (set I just finished,
+  // resting now). Once the timer itself finishes: "II" (ready for set II)
+  const label=setCounterTimerActive
+    ?`${toRoman(setCounterValue)} <span style="font-weight:400">DONE</span>`
+    :toRoman(setCounterValue+1);
   if(!label)return;
   // a shared/linked exercise appears under several DOM ids — update them all so
   // the counter is visible whichever tab you're looking at
   document.querySelectorAll('.ex-set-counter').forEach(el=>{
-    const elU=el.id.replace(/^setnum-/,'');
+    const elU=el.id.replace(/^it-setnum-/,'').replace(/^setnum-/,'');
     if(dataUidOf(elU)===setCounterU){
-      el.textContent=label;
+      el.innerHTML=label;
       el.classList.add('show');
     }
   });
@@ -3603,6 +3970,7 @@ function renderSetCounter(){
 function resetSetCounter(){
   setCounterU=null;
   setCounterValue=0;
+  setCounterTimerActive=false;
   clearAllSetCounters();
 }
 
@@ -3638,6 +4006,9 @@ function startTimer(sec,name,u,day,groupId,altIdx){
       beeped30:false,beepedDone:false
     };
     slide.innerHTML=_timerHTML(u,name,sec,day,groupId,altIdx!=null?parseInt(altIdx):null);
+    // the countdown panel's own counter badge (it-setnum-*) only just entered
+    // the DOM — bumpSetCounter's render call above ran too early to reach it
+    renderSetCounter();
   }
 
   const rb=document.getElementById('rest-btn-'+u);
@@ -3681,6 +4052,12 @@ function _startTickInterval(u){
       beep(660,.5,.6);
       setTimeout(()=>beep(880,.7,.6),380);
       setTimeout(()=>cancelTimer(u),1600);
+      // the rest period for THIS press is over — swap "I DONE" for "II" right
+      // as the timer completes, not waiting for the panel to revert
+      if(setCounterU===dataUidOf(u)){
+        setCounterTimerActive=false;
+        renderSetCounter();
+      }
     }
   },500);// poll every 500ms for snappier catch-up after background
 }
@@ -3698,6 +4075,13 @@ function cancelTimer(u){
   delete activeTimers[u];
   const rb=document.getElementById('rest-btn-'+u);
   if(rb)rb.classList.remove('active');
+  // cancelling behaves the same as the timer finishing naturally — the next
+  // roman numeral appears, with no "DONE" label, whether this run through
+  // cancelTimer came from the ✕ button or from the natural-finish auto-cancel
+  if(setCounterU===dataUidOf(u)){
+    setCounterTimerActive=false;
+    renderSetCounter();
+  }
   if(t?.day){
     // re-render the full day so any weight/increase changes from Tips show up
     renderDay(t.day);
@@ -3736,6 +4120,7 @@ function _timerHTML(u,name,total,day,groupId,altIdx){
     :'';
   return `<div class="it-wrap">
     <div class="it-header-row">
+      <span class="ex-set-counter" id="it-setnum-${u}" style="flex-shrink:0;font-size:13px"></span>
       <div class="it-name" id="it-name-${u}">${name}</div>
       ${tipsBtn}
     </div>
@@ -3843,7 +4228,7 @@ function sw(id){
 // ══════════════════════════════════════════
 document.addEventListener('keydown',e=>{
   if(e.key==='Enter'){const o=document.querySelector('.input-row.show');if(o)saveWeight(o.id.replace('input-',''))}
-  if(e.key==='Escape'){document.querySelectorAll('.input-row.show').forEach(r=>r.classList.remove('show'));['ov-reset','ov-del','ov-add','ov-edit','ov-cal','ov-clear','ov-cal-picker','ov-cal-del','ov-tips','ov-stats-edit','ov-stats-del-confirm','ov-clear-section','ov-wb-picker','ov-sbpb-popup','ov-record-log','ov-record-edit','ov-record-del','ov-record-jump','ov-session-summary','ov-photo-picker','ov-badge-detail','ov-avatar-picker','ov-badge-unlock','ov-avatar-remove'].forEach(id=>closeOv(id))}
+  if(e.key==='Escape'){document.querySelectorAll('.input-row.show').forEach(r=>r.classList.remove('show'));['ov-reset','ov-del','ov-add','ov-edit','ov-cal','ov-clear','ov-cal-picker','ov-cal-del','ov-tips','ov-stats-edit','ov-stats-del-confirm','ov-clear-section','ov-wb-picker','ov-sbpb-popup','ov-record-log','ov-record-edit','ov-record-del','ov-record-jump','ov-session-summary','ov-photo-picker','ov-badge-detail','ov-avatar-picker','ov-badge-unlock','ov-avatar-remove','ov-cardio-add','ov-cardio-blocked','ov-cardio-del','ov-record-bulk-del','ov-trophy-unlock'].forEach(id=>closeOv(id))}
 });
 
 // ── DONE SESSION ──
@@ -3944,11 +4329,11 @@ function formatVolume(n){
   return Math.round(n).toLocaleString('en-US');
 }
 
-function openSessionSummary(day){
-  const s=buildSessionSummary(day);
+// shared by the live "just finished" popup and the later "view past session"
+// lookup — builds the title + body HTML from an already-computed summary object
+function buildSessionSummaryHTML(day,s){
   const dm={push:{cls:'done-push',emoji:'💪',label:'Push'},pull:{cls:'done-pull',emoji:'🔙',label:'Pull'},legs:{cls:'done-legs',emoji:'🦵',label:'Legs'},all:{cls:'done-all',emoji:'🏋️',label:'Whole Body'}}[day]||{cls:'done-push',emoji:'💪',label:day};
-
-  document.getElementById('session-summary-title').textContent=`${dm.emoji} ${dm.label} — Session Complete!`;
+  const title=`${dm.emoji} ${dm.label} — Session Complete!`;
 
   const hasVolume=s.exerciseCount>0;
   const volumeHtml=hasVolume?`
@@ -3981,8 +4366,50 @@ function openSessionSummary(day){
     ${s.increased.map(r=>`<div style="font-size:12px;color:var(--text2);padding:2px 0">${r.emoji} ${r.name}</div>`).join('')}
   </div>`:'';
 
-  document.getElementById('session-summary-body').innerHTML=volumeHtml+itemsHtml+recordsHtml+increasedHtml;
+  return{title,bodyHtml:volumeHtml+itemsHtml+recordsHtml+increasedHtml};
+}
 
+// snapshots are keyed by calendar date so a session's summary can be looked
+// back up later — from Dashboard's "Last Training" tile, or a calendar entry —
+// even though the raw timer log that computed it gets cleared right after use
+function saveSessionSummarySnapshot(dateKey,day,s){
+  const d=loadData();
+  if(!d.sessionSummaries)d.sessionSummaries={};
+  d.sessionSummaries[dateKey]={day,s};
+  saveData(d);
+}
+function getSessionSummarySnapshot(dateKey){
+  const d=loadData();
+  return(d.sessionSummaries&&d.sessionSummaries[dateKey])||null;
+}
+
+// looks up a previously-saved summary and shows it, or a "no details" message
+// if none was ever recorded for that date (manual entry, import, or logged
+// before this feature existed)
+function viewSavedSessionSummary(dateKey){
+  const snap=getSessionSummarySnapshot(dateKey);
+  const closeBtn=document.getElementById('session-summary-close-btn');
+  if(!snap){
+    document.getElementById('session-summary-title').textContent='No Details Available';
+    document.getElementById('session-summary-body').innerHTML=
+      '<div class="cal-empty-msg" style="padding:1.2rem .5rem;text-align:center;font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:1rem">No summary was recorded for this training — it may have been logged manually, imported, or completed before this feature existed.</div>';
+    if(closeBtn)closeBtn.textContent='Ok, got it 👌';
+    openOv('ov-session-summary');
+    return;
+  }
+  if(closeBtn)closeBtn.textContent='Nice! Close';
+  const{title,bodyHtml}=buildSessionSummaryHTML(snap.day,snap.s);
+  document.getElementById('session-summary-title').textContent=title;
+  document.getElementById('session-summary-body').innerHTML=bodyHtml;
+  openOv('ov-session-summary');
+}
+
+function openSessionSummary(day){
+  const s=buildSessionSummary(day);
+  const{title,bodyHtml}=buildSessionSummaryHTML(day,s);
+  document.getElementById('session-summary-title').textContent=title;
+  document.getElementById('session-summary-body').innerHTML=bodyHtml;
+  saveSessionSummarySnapshot(todayISO(),day,s);
   clearSessionLog(day);
   openOv('ov-session-summary');
 }
@@ -4020,6 +4447,8 @@ let calPickedType='push';
 let calPickedDeload=false;
 let calPickedNoCheatMealTraining=false;// 🥗 No Cheat Meal + Training
 let calPickedNoCheatMealOnly=false;// 🥗 No Cheat Meal (no training required)
+let calPickedCardio=null;// {emoji,title,time} or null — optional cardio attached to this entry
+let calEditingRealTraining=false;// true when editing an entry that already has a real training type
 
 const TYPE_LABELS={push:'💪 Push',pull:'🔙 Pull',legs:'🦵 Legs',all:'🏋️ Whole Body',cardio:'🏃 Cardio',other:'📝 Other'};
 const MONTH_NAMES=['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -4037,16 +4466,57 @@ function calShift(dir){
 // Attached once — the grid element persists across renderCal() calls (only its
 // contents are replaced via innerHTML), so this survives month changes.
 function attachCalSwipeHandler(){
-  const el=document.getElementById('cal-grid');
-  if(!el||el._swipeAttached)return;
-  el._swipeAttached=true;
-  let sx=0,sy=0;
-  el.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});
-  el.addEventListener('touchend',e=>{
-    const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;
-    if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>40){
-      if(dx>0)calShift(-1);// swipe right -> earlier month
-      else calShift(1);// swipe left -> later month
+  const viewport=document.getElementById('cal-swipe-viewport');
+  const track=document.getElementById('cal-swipe-track');
+  if(!viewport||!track||viewport._swipeAttached)return;
+  viewport._swipeAttached=true;
+  let sx=0,sy=0,dragging=false,horizontal=false,vw=0;
+
+  viewport.addEventListener('touchstart',e=>{
+    sx=e.touches[0].clientX;
+    sy=e.touches[0].clientY;
+    vw=viewport.offsetWidth;
+    dragging=true;horizontal=false;
+    track.style.transition='none';
+  },{passive:true});
+
+  viewport.addEventListener('touchmove',e=>{
+    if(!dragging)return;
+    const dx=e.touches[0].clientX-sx;
+    const dy=e.touches[0].clientY-sy;
+    if(!horizontal){
+      if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>6)horizontal=true;
+      else if(Math.abs(dy)>Math.abs(dx)&&Math.abs(dy)>6){dragging=false;return;}
+    }
+    if(horizontal){
+      e.preventDefault();
+      // clamp so you can't drag more than one panel-width past either neighbour
+      const clamped=Math.max(-vw,Math.min(vw,dx));
+      // the whole 3-month track moves in exact lockstep with the finger —
+      // marks and selections stay visible throughout since it's the same
+      // rendered grids sliding, not a redraw
+      track.style.transform=`translateX(calc(-33.3333% + ${clamped}px))`;
+    }
+  },{passive:false});
+
+  viewport.addEventListener('touchend',e=>{
+    if(!dragging)return;
+    dragging=false;
+    if(!horizontal)return;
+    const dx=e.changedTouches[0].clientX-sx;
+    const threshold=vw*0.25;
+    track.style.transition='transform .26s ease';
+    if(dx<=-threshold){
+      // committed to the NEXT month — finish the slide, then swap the
+      // centered panel and reset (renderCal -> calShift does this)
+      track.style.transform='translateX(-66.6666%)';
+      setTimeout(()=>calShift(1),260);
+    } else if(dx>=threshold){
+      track.style.transform='translateX(0%)';
+      setTimeout(()=>calShift(-1),260);
+    } else {
+      // not dragged far enough — spring back to the current month
+      track.style.transform='translateX(-33.3333%)';
     }
   },{passive:true});
 }
@@ -4102,29 +4572,19 @@ function calGoToday(){
   renderCal();
 }
 
-function renderCal(){
-  attachCalSwipeHandler();
-  const today=new Date();
-  const monthLabel=document.getElementById('cal-month-label');
-  if(monthLabel)monthLabel.textContent=`${MONTH_NAMES[calMonth]} ${calYear} ▾`;
-
-  // show Today button only when not on current month
-  const isCurrentMonth=(calYear===today.getFullYear()&&calMonth===today.getMonth());
-  const todayBtn=document.getElementById('cal-today-btn');
-  if(todayBtn)todayBtn.style.display=isCurrentMonth?'none':'block';
-  const entries=calLoad();
-  const todayKey=calKey(today.getFullYear(),today.getMonth(),today.getDate());
-
-  const firstDay=new Date(calYear,calMonth,1).getDay();
+// builds just the day-cell HTML for one month — reused for the current panel
+// plus the prev/next neighbours so all three can be swiped between
+function buildCalMonthGridHTML(year,month,todayKey,entries){
+  const firstDay=new Date(year,month,1).getDay();
   const startOffset=(firstDay+6)%7;
-  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+  const daysInMonth=new Date(year,month+1,0).getDate();
 
   let html='';
   for(let i=0;i<startOffset;i++){
     html+=`<div class="cal-day empty"></div>`;
   }
   for(let d=1;d<=daysInMonth;d++){
-    const key=calKey(calYear,calMonth,d);
+    const key=calKey(year,month,d);
     const entry=entries[key];
     const dow=(startOffset+d-1)%7;
     const isWeekend=dow>=5;
@@ -4138,16 +4598,17 @@ function renderCal(){
     let emojiHtml='';
     let deloadDot='';
     let cheatMealMark='';
+    let cardioMark='';
 
     if(entry){
       let tc;
-      if(entry.dietOnly){
-        // no training type to color by — use a distinct green "clean day" identity
+      if(entry.dietOnly&&entry.noCheatMeal){
         tc={bg:'rgba(34,197,94,.13)',border:'rgba(34,197,94,.45)',color:'#22c55e',emoji:''};
+      } else if(entry.dietOnly){
+        tc=TYPE_CAL.other;
       } else {
         tc=TYPE_CAL[entry.type]||TYPE_CAL.other;
       }
-      const isDone=entry.status==='done';
       const isPlanned=entry.status==='planned';
       const bw=isToday?(isPlanned?'3px':'2.5px'):(isPlanned?'2px':'1.5px');
       const borderStyle=isPlanned?`${bw} dashed ${tc.border}`:`${bw} solid ${tc.border}`;
@@ -4159,11 +4620,48 @@ function renderCal(){
       if(entry.noCheatMeal){
         cheatMealMark=`<span style="position:absolute;top:0px;left:2px;font-size:7px;line-height:1">🥗</span>`;
       }
+      if(entry.cardio){
+        cardioMark=`<span style="position:absolute;bottom:0px;right:2px;font-size:7px;line-height:1">🏃</span>`;
+      }
     }
 
-    html+=`<div class="${extraCls}" style="${style}position:relative" onclick="calDayClick('${key}',${d})">${deloadDot}${cheatMealMark}${emojiHtml}<span>${d}</span></div>`;
+    html+=`<div class="${extraCls}" style="${style}position:relative" onclick="calDayClick('${key}',${d})">${deloadDot}${cheatMealMark}${cardioMark}${emojiHtml}<span>${d}</span></div>`;
   }
-  document.getElementById('cal-grid').innerHTML=html;
+  return html;
+}
+
+function renderCal(){
+  const today=new Date();
+  const monthLabel=document.getElementById('cal-month-label');
+  if(monthLabel)monthLabel.textContent=`${MONTH_NAMES[calMonth]} ${calYear} ▾`;
+
+  // show Today button only when not on current month
+  const isCurrentMonth=(calYear===today.getFullYear()&&calMonth===today.getMonth());
+  const todayBtn=document.getElementById('cal-today-btn');
+  if(todayBtn)todayBtn.style.display=isCurrentMonth?'none':'block';
+  const entries=calLoad();
+  const todayKey=calKey(today.getFullYear(),today.getMonth(),today.getDate());
+
+  let prevY=calYear,prevM=calMonth-1;
+  if(prevM<0){prevM=11;prevY--;}
+  let nextY=calYear,nextM=calMonth+1;
+  if(nextM>11){nextM=0;nextY++;}
+
+  document.getElementById('cal-grid-prev').innerHTML=buildCalMonthGridHTML(prevY,prevM,todayKey,entries);
+  document.getElementById('cal-grid').innerHTML=buildCalMonthGridHTML(calYear,calMonth,todayKey,entries);
+  document.getElementById('cal-grid-next').innerHTML=buildCalMonthGridHTML(nextY,nextM,todayKey,entries);
+
+  // snap the track back to the centered (current-month) position with no
+  // animation — any animated transition to get here already happened during
+  // the swipe itself, this just resets state for the next gesture
+  const track=document.getElementById('cal-swipe-track');
+  if(track){
+    track.style.transition='none';
+    track.style.transform='translateX(-33.3333%)';
+    void track.offsetWidth;// force reflow so the next transition isn't skipped
+  }
+
+  attachCalSwipeHandler();
   renderCalHistory(entries);
 }
 
@@ -4180,29 +4678,45 @@ function renderCalHistory(entries){
     const e=entries[k];
     const d=new Date(k+'T12:00:00');
     const dateStr=d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
-    const tag=e.dietOnly
+    // dietOnly is reused as a generic "not a real training day" flag — only show
+    // the Clean Day label when noCheatMeal is ALSO set, since a cardio-only
+    // fallback entry sets dietOnly without noCheatMeal
+    const tag=(e.dietOnly&&e.noCheatMeal)
       ?`<span class="type-tag" style="background:var(--green-dim);color:var(--green);border:1px solid var(--green-border)">🥗 Clean Day</span>`
-      :`<span class="type-tag ${e.type}">${TYPE_LABELS[e.type]||e.type}</span>`;
-    const deloadTag=e.deload?`<span class="cal-entry-deload-tag">DELOAD</span>`:'';
+      :(e.dietOnly?`<span class="type-tag other">🏃 Cardio Only</span>`:`<span class="type-tag ${e.type}">${TYPE_LABELS[e.type]||e.type}</span>`);
+    const deloadTag=e.deload?`<span class="cal-entry-deload-tag" style="background:var(--red-dim);border-color:var(--red-border);color:var(--red)">🔻</span>`:'';
     const cheatMealTag=(e.noCheatMeal&&!e.dietOnly)?`<span class="cal-entry-deload-tag" style="background:var(--green-dim);border-color:var(--green-border);color:var(--green)">🥗</span>`:'';
+    const cardioTag=e.cardio?`<span class="cal-entry-deload-tag" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3);color:#fff">${e.cardio.emoji}</span>`:'';
     const noteHtml=e.note?`<div class="cal-entry-note">${e.note}</div>`:'';
     const statusLabel=e.status==='planned'?'<span style="font-size:10px;color:var(--blue);margin-left:6px">PLANNED</span>':'';
     const safeNote=(e.note||'').replace(/`/g,"'");
+    // only a real, completed training day can have a session summary to reveal
+    const isRealDoneTraining=e.status==='done'&&!e.dietOnly;
+    const hasSummary=isRealDoneTraining&&!!getSessionSummarySnapshot(k);
+    const detailsInner=isRealDoneTraining
+      ?(hasSummary
+        ?`<button class="cal-details-btn" onclick="event.stopPropagation();viewSavedSessionSummary('${k}')">📊 View Details</button>`
+        :`<div class="cal-details-empty">No details about this training</div>`)
+      :'';
+    const detailsSlot=isRealDoneTraining?`<div class="cal-details-slot" id="cal-details-${k}"><div class="cal-details-inner">${detailsInner}</div></div>`:'';
     return `<div class="cal-swipe-item">
-      <div class="cal-swipe-actions">
-        <div class="cal-swipe-edit-bg" onclick="calSwipeEdit('${k}',${e.status==='planned'},'${e.type}',\`${safeNote}\`,${!!e.deload},${!!e.noCheatMeal&&!e.dietOnly},${!!e.dietOnly})">✏️</div>
-        <div class="cal-swipe-delete-bg" onclick="calSwipeDelete('${k}')">🗑️</div>
-      </div>
-      <div class="cal-entry" data-key="${k}" data-offset="0">
-        <div class="cal-entry-dot ${e.status}"></div>
-        <div class="cal-entry-info">
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
-            <div class="cal-entry-date" style="margin-bottom:0">${dateStr}${statusLabel}</div>
-            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">${deloadTag}${cheatMealTag}${tag}</div>
+      <div class="cal-swipe-row">
+        <div class="cal-swipe-actions">
+          <div class="cal-swipe-edit-bg" onclick="calSwipeEdit('${k}',${e.status==='planned'},'${e.type}',\`${safeNote}\`,${!!e.deload},${!!e.noCheatMeal&&!e.dietOnly},${!!e.dietOnly})">✏️</div>
+          <div class="cal-swipe-delete-bg" onclick="calSwipeDelete('${k}')">🗑️</div>
+        </div>
+        <div class="cal-entry" data-key="${k}" data-offset="0" data-has-details="${isRealDoneTraining?'1':'0'}">
+          <div class="cal-entry-dot ${e.status}"></div>
+          <div class="cal-entry-info">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
+              <div class="cal-entry-date" style="margin-bottom:0">${dateStr}${statusLabel}</div>
+              <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">${deloadTag}${cheatMealTag}${cardioTag}${tag}</div>
+            </div>
+            ${noteHtml}
           </div>
-          ${noteHtml}
         </div>
       </div>
+      ${detailsSlot}
     </div>`;
   }).join('');
   calAttachSwipeHandlers();
@@ -4231,6 +4745,8 @@ function calAttachSwipeHandlers(){
     if(el._swipeAttached)return;
     el._swipeAttached=true;
     let startX=0,startY=0,baseX=0,dragging=false,horizontal=false;
+
+    let justSwiped=false;
 
     el.addEventListener('touchstart',e=>{
       startX=e.touches[0].clientX;
@@ -4278,15 +4794,30 @@ function calAttachSwipeHandlers(){
       }
       el.style.transform='translateX('+target+'px)';
       el.dataset.offset=String(target);
+      if(horizontal){
+        // a real drag happened — make sure the click that mobile browsers fire
+        // right after touchend can't also toggle the details panel
+        justSwiped=true;
+        setTimeout(()=>{justSwiped=false;},350);
+      }
     },{passive:true});
 
-    // tap on an already-open entry closes it
+    // tap on an already-open (swiped) entry closes it; tap on a resting entry
+    // that has training-day details toggles the slide-out panel below it —
+    // but never both from the same gesture
     el.addEventListener('click',()=>{
+      if(justSwiped)return;
       const cur=parseFloat(el.dataset.offset||'0');
       if(cur!==0){
         el.style.transition='transform .22s ease';
         el.style.transform='translateX(0px)';
         el.dataset.offset='0';
+        return;
+      }
+      if(el.dataset.hasDetails==='1'){
+        const key=el.dataset.key;
+        const slot=document.getElementById('cal-details-'+key);
+        if(slot)slot.classList.toggle('open');
       }
     });
   });
@@ -4310,7 +4841,7 @@ function calDayClick(key,day){
 
   const deloadTagInline=existing?.deload?'<span class="cal-entry-deload-tag" style="margin-left:8px">DELOAD</span>':'';
   const cheatMealTagInline=existing?.noCheatMeal?'<span class="cal-entry-deload-tag" style="margin-left:8px;background:var(--green-dim);border-color:var(--green-border);color:var(--green)">🥗 CLEAN</span>':'';
-  const typeLabelText=existing?.dietOnly?'🥗 Clean Day (No Training)':(TYPE_LABELS[existing?.type]||existing?.type);
+  const typeLabelText=(existing?.dietOnly&&existing?.noCheatMeal)?'🥗 Clean Day (No Training)':(existing?.dietOnly?'🏃 Cardio Only (No Training)':(TYPE_LABELS[existing?.type]||existing?.type));
 
   if(existing?.status==='planned' && (isToday||isPast)){
     // planned day reached — offer Done or Cancel
@@ -4354,9 +4885,14 @@ function calOpenForm(key,isPlanned,prefType,prefNote,prefDeload,prefNoCheatMealT
   calPickedDeload=!!prefDeload;
   calPickedNoCheatMealTraining=!!prefNoCheatMealTraining;
   calPickedNoCheatMealOnly=!!prefNoCheatMealOnly;
+  // looked up directly from storage rather than passed through onclick, since a
+  // cardio option's description could contain characters that break attribute escaping
+  calPickedCardio=calLoad()[key]?.cardio||null;
+  calEditingRealTraining=!!(prefType&&prefType!=='null'&&prefType!==''&&!prefNoCheatMealOnly);
   document.getElementById('ov-cal-date').textContent=
     new Date(key+'T12:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
   document.getElementById('ov-cal-body').innerHTML=calFormBodyHTML(key,isPlanned,prefNote);
+  renderCalCardioSection();
   openOv('ov-cal');
 }
 
@@ -4365,9 +4901,12 @@ function calOpenFormDirect(key,isPlanned,prefType,prefNote,prefDeload,prefNoChea
   calPickedDeload=!!prefDeload;
   calPickedNoCheatMealTraining=!!prefNoCheatMealTraining;
   calPickedNoCheatMealOnly=!!prefNoCheatMealOnly;
+  calPickedCardio=calLoad()[key]?.cardio||null;
+  calEditingRealTraining=!!(prefType&&prefType!=='null'&&prefType!==''&&!prefNoCheatMealOnly);
   document.getElementById('ov-cal-date').textContent=
     new Date(key+'T12:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   document.getElementById('ov-cal-body').innerHTML=calFormBodyHTML(key,isPlanned,prefNote);
+  renderCalCardioSection();
   openOv('ov-cal');
 }
 
@@ -4378,6 +4917,9 @@ function calFormBodyHTML(key,isPlanned,prefNote){
   ).join('');
   const actionLabel=isPlanned?'Save Plan':'Log Training';
   const grayed=calPickedNoCheatMealOnly?' cal-grayed':'';
+  // editing an existing real training entry — converting it into a "no training"
+  // day via this specific checkbox doesn't make sense, so it's disabled
+  const ncmOnlyDisabled=calEditingRealTraining?' cal-grayed':'';
   return`
     <div class="type-grid${grayed}" id="cal-type-grid">${typeGrid}</div>
     <div class="cal-deload-row${calPickedDeload?' checked':''}${grayed}" id="cal-deload-row" onclick="calToggleDeload()">
@@ -4390,12 +4932,13 @@ function calFormBodyHTML(key,isPlanned,prefNote){
         <div class="cal-cheatmeal-emoji">🥗</div>
         <div class="cal-cheatmeal-label">No Cheat Meal + Training</div>
       </div>
-      <div class="cal-cheatmeal-row${calPickedNoCheatMealOnly?' checked':''}" id="cal-ncm-only-row" onclick="calToggleNoCheatMealOnly()">
+      <div class="cal-cheatmeal-row${calPickedNoCheatMealOnly?' checked':''}${ncmOnlyDisabled}" id="cal-ncm-only-row" onclick="calToggleNoCheatMealOnly()">
         <div class="cal-cheatmeal-checkbox">✓</div>
         <div class="cal-cheatmeal-emoji">🥗</div>
         <div class="cal-cheatmeal-label">No Cheat Meal</div>
       </div>
     </div>
+    <div id="cal-cardio-section" style="margin-bottom:1rem"></div>
     <textarea class="cal-note-input" id="cal-note-input" rows="2" placeholder="Short note (optional)">${prefNote||''}</textarea>
     <div class="sheet-btns">
       <button class="btn-orange" onclick="calSaveEntry('${key}','${isPlanned?'planned':'done'}')">${calPickedNoCheatMealOnly?'Log Clean Day':actionLabel}</button>
@@ -4424,6 +4967,7 @@ function calToggleNoCheatMealTraining(){
   calRefreshCalForm();
 }
 function calToggleNoCheatMealOnly(){
+  if(calEditingRealTraining)return;// disabled while editing a real training entry
   calPickedNoCheatMealOnly=!calPickedNoCheatMealOnly;
   if(calPickedNoCheatMealOnly)calPickedNoCheatMealTraining=false;
   calRefreshCalForm();
@@ -4439,6 +4983,49 @@ function calRefreshCalForm(){
   if(typeGrid)typeGrid.classList.toggle('cal-grayed',calPickedNoCheatMealOnly);
   if(deloadRow)deloadRow.classList.toggle('cal-grayed',calPickedNoCheatMealOnly);
   if(saveBtn)saveBtn.textContent=calPickedNoCheatMealOnly?'Log Clean Day':(saveBtn.textContent.includes('Plan')?'Save Plan':'Log Training');
+  renderCalCardioSection();
+}
+
+// optional "also did cardio" toggle + picker, shown on every calendar entry
+// form — independent of training type / clean-day status, so it coexists with
+// both instead of one overwriting the other
+function renderCalCardioSection(){
+  const container=document.getElementById('cal-cardio-section');
+  if(!container)return;
+  const opts=getCardioOptions();
+  // cardio doesn't make sense on a day with no training logged — grey it out
+  // the same way the type picker and deload row already are in that state
+  const disabled=calPickedNoCheatMealOnly;
+  const grayed=disabled?' cal-grayed':'';
+  const label=calPickedCardio?`Also did cardio: ${calPickedCardio.title}`:'Also did cardio';
+  const toggleRow=`<div class="cal-cheatmeal-row${calPickedCardio?' checked':''}${grayed}" id="cal-cardio-toggle-row" onclick="calToggleCardio()">
+    <div class="cal-cheatmeal-checkbox">✓</div>
+    <div class="cal-cheatmeal-emoji">🏃</div>
+    <div class="cal-cheatmeal-label">${label}</div>
+  </div>`;
+  const picker=(calPickedCardio&&opts.length&&!disabled)?`<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px">
+    ${opts.map((opt,i)=>`<div class="cal-cheatmeal-row${calPickedCardio.title===opt.title?' checked':''}" style="padding:7px 6px" onclick="calSelectCardio(${i})">
+      <div class="cal-cheatmeal-emoji" style="font-size:13px">${opt.emoji}</div>
+      <div class="cal-cheatmeal-label" style="font-size:10px">${opt.title}</div>
+    </div>`).join('')}
+  </div>`:'';
+  container.innerHTML=toggleRow+picker;
+}
+function calToggleCardio(){
+  if(calPickedNoCheatMealOnly)return;// disabled while logging a no-training day
+  if(calPickedCardio){
+    calPickedCardio=null;
+  } else {
+    const opts=getCardioOptions();
+    calPickedCardio=opts.length?{...opts[0]}:null;
+  }
+  renderCalCardioSection();
+}
+function calSelectCardio(i){
+  if(calPickedNoCheatMealOnly)return;
+  const opts=getCardioOptions();
+  if(opts[i])calPickedCardio={...opts[i]};
+  renderCalCardioSection();
 }
 
 function calSaveEntry(key,status){
@@ -4446,13 +5033,14 @@ function calSaveEntry(key,status){
   const entries=calLoad();
   const wasAlreadyPlanned=entries[key]?.status==='planned';
   const noCheatMeal=calPickedNoCheatMealTraining||calPickedNoCheatMealOnly;
+  const cardio=calPickedCardio||undefined;// undefined so JSON.stringify simply omits it when not set
 
   if(calPickedNoCheatMealOnly){
     // diet-only day: no training type needed, always logged as done — you either
     // avoided a cheat meal today or you didn't, there's nothing to "plan" ahead of time
-    entries[key]={type:null,note,status:'done',deload:false,noCheatMeal:true,dietOnly:true};
+    entries[key]={type:null,note,status:'done',deload:false,noCheatMeal:true,dietOnly:true,cardio};
   } else {
-    entries[key]={type:calPickedType,note,status,deload:calPickedDeload,noCheatMeal,dietOnly:false};
+    entries[key]={type:calPickedType,note,status,deload:calPickedDeload,noCheatMeal,dietOnly:false,cardio};
   }
 
   calSave(entries);
@@ -4462,6 +5050,8 @@ function calSaveEntry(key,status){
   calPickedDeload=false;
   calPickedNoCheatMealTraining=false;
   calPickedNoCheatMealOnly=false;
+  calPickedCardio=null;
+  calEditingRealTraining=false;
   closeOv('ov-cal');
   renderCal();
   // multicolor confetti for a diet-only day (no training type to color by),
@@ -5015,6 +5605,16 @@ const BADGES=[
   {id:'my_height_is',cat:'Personalization',color:'orange',emoji:'📐',name:'Standing Tall',desc:'Enter your height on your Profile for the first time.',calc:()=>({current:(getProfile().height||'').toString().trim()?1:0,target:1})},
   {id:'accent_changed',cat:'Personalization',color:'orange',emoji:'🎨',name:'Your True Colors',desc:'Change your Accent Color for the first time.',calc:()=>{const c=getProfile().accentColor;return{current:(c&&c!=='orange')?1:0,target:1};}},
 
+  {id:'yt_1',cat:'Personal Trainer',color:'orange',emoji:'🎬',name:'Show Me How',desc:'Add a YouTube link to an exercise for the first time.',calc:()=>({current:loadData().youtubeLinkCount||0,target:1})},
+  {id:'yt_10',cat:'Personal Trainer',color:'orange',emoji:'📹',name:'Video Library',desc:'Add 10 YouTube links.',calc:()=>({current:loadData().youtubeLinkCount||0,target:10})},
+  {id:'yt_25',cat:'Personal Trainer',color:'orange',emoji:'🎥',name:'Film Buff',desc:'Add 25 YouTube links.',calc:()=>({current:loadData().youtubeLinkCount||0,target:25})},
+  {id:'yt_50',cat:'Personal Trainer',color:'orange',emoji:'📽️',name:'Director Mode',desc:'Add 50 YouTube links.',calc:()=>({current:loadData().youtubeLinkCount||0,target:50})},
+  {id:'yt_100',cat:'Personal Trainer',color:'orange',emoji:'🏆',name:'Full Filmography',desc:'Add 100 YouTube links.',calc:()=>({current:loadData().youtubeLinkCount||0,target:100})},
+  {id:'instr_1',cat:'Personal Trainer',color:'orange',emoji:'📝',name:'First Lesson',desc:'Add a custom instruction to an exercise for the first time.',calc:()=>({current:loadData().customInstructionCount||0,target:1})},
+  {id:'instr_10',cat:'Personal Trainer',color:'orange',emoji:'📋',name:'Coaching Notes',desc:'Add 10 custom instructions.',calc:()=>({current:loadData().customInstructionCount||0,target:10})},
+  {id:'instr_25',cat:'Personal Trainer',color:'orange',emoji:'📖',name:'Playbook',desc:'Add 25 custom instructions.',calc:()=>({current:loadData().customInstructionCount||0,target:25})},
+  {id:'instr_50',cat:'Personal Trainer',color:'orange',emoji:'🎓',name:'Head Coach',desc:'Add 50 custom instructions.',calc:()=>({current:loadData().customInstructionCount||0,target:50})},
+
   {id:'clean_3days',cat:'Clean Eating',color:'green',emoji:'🥗',name:'Clean Start',desc:'3 consecutive days without a cheat meal.',calc:()=>({current:computeLongestCleanStreak(),target:3})},
   {id:'clean_week',cat:'Clean Eating',color:'green',emoji:'📆',name:'Clean Week',desc:'7 consecutive days without a cheat meal.',calc:()=>({current:computeLongestCleanStreak(),target:7})},
   {id:'clean_2weeks',cat:'Clean Eating',color:'green',emoji:'🥦',name:'2-Week Clean Streak',desc:'14 consecutive days without a cheat meal.',calc:()=>({current:computeLongestCleanStreak(),target:14})},
@@ -5024,6 +5624,13 @@ const BADGES=[
   {id:'clean_year',cat:'Clean Eating',color:'green',emoji:'🏆',name:'Clean Year',desc:'269 clean days within a single calendar year.',calc:()=>({current:maxCleanDaysInAnyYear(),target:269})},
   {id:'clean_weekend',cat:'Clean Eating',color:'green',emoji:'🎉',name:'Clean Weekend',desc:'Both Saturday and Sunday clean in the same weekend.',calc:()=>({current:getCleanWeekendCount(),target:1})},
   {id:'clean_weekend_10',cat:'Clean Eating',color:'green',emoji:'🥂',name:'Weekend Warrior',desc:'10 full clean weekends (Saturday and Sunday both clean).',calc:()=>({current:getCleanWeekendCount(),target:10})},
+
+  {id:'cardio_1',cat:'Post-Workout Cardio',color:'orange',emoji:'🏃',name:'First Steps',desc:'Complete your first post-session cardio.',calc:()=>({current:getTotalCardioCompleted(),target:1})},
+  {id:'cardio_5',cat:'Post-Workout Cardio',color:'orange',emoji:'👟',name:'Warming Up',desc:'Complete 5 post-session cardio sessions.',calc:()=>({current:getTotalCardioCompleted(),target:5})},
+  {id:'cardio_25',cat:'Post-Workout Cardio',color:'orange',emoji:'🔥',name:'Cardio Habit',desc:'Complete 25 post-session cardio sessions.',calc:()=>({current:getTotalCardioCompleted(),target:25})},
+  {id:'cardio_100',cat:'Post-Workout Cardio',color:'orange',emoji:'💯',name:'Cardio Century',desc:'Complete 100 post-session cardio sessions.',calc:()=>({current:getTotalCardioCompleted(),target:100})},
+  {id:'cardio_200',cat:'Post-Workout Cardio',color:'orange',emoji:'🚴',name:'Engine Built',desc:'Complete 200 post-session cardio sessions.',calc:()=>({current:getTotalCardioCompleted(),target:200})},
+  {id:'cardio_400',cat:'Post-Workout Cardio',color:'orange',emoji:'🏅',name:'Cardio Machine',desc:'Complete 400 post-session cardio sessions.',calc:()=>({current:getTotalCardioCompleted(),target:400})},
 ];
 
 let pendingBadgeCelebrations=[];
@@ -5037,6 +5644,88 @@ function getUnlockedBadges(){return loadData().badgesUnlocked||{}}
 // isBooting suppresses celebrations entirely on first load, so opening the app
 // never replays achievements that were earned in an earlier session.
 let badgesBooting=false;
+// ══════════════════════════════════════════
+// RANK TROPHIES
+// Four milestones based on total unlocked badge count: Bronze (10), Silver
+// (25), Gold (50), Champion (every badge). Celebrated once each, chained
+// AFTER any badge celebrations from the same check so they never compete for
+// the screen — badge popups drain first, then any newly-crossed trophy shows.
+// ══════════════════════════════════════════
+let pendingTrophyCelebrations=[];
+function getTrophyMilestones(){
+  return[
+    {id:'bronze',threshold:10,emoji:'🥉',name:'Bronze Rank',shortName:'Bronze',colors:['#cd7f32','#a86428','#e8a869','#b5651d']},
+    {id:'silver',threshold:25,emoji:'🥈',name:'Silver Rank',shortName:'Silver',colors:['#c0c0c0','#9a9a9a','#e8e8e8','#b0b0b0']},
+    {id:'gold',threshold:50,emoji:'🥇',name:'Gold Rank',shortName:'Gold',colors:['#ffd700','#e6b800','#fff2a8','#d4af00']},
+    {id:'champion',threshold:BADGES.length,emoji:'🏆',name:'Champion Rank',shortName:'Champion',colors:['#cd7f32','#c0c0c0','#ffd700','#e8e8e8']},
+  ];
+}
+function getTrophiesSeen(){return loadData().trophiesSeen||{}}
+
+function checkTrophies(unlockedCount){
+  const d=loadData();
+  const seen=d.trophiesSeen||{};
+  let changed=false;
+  getTrophyMilestones().forEach(tr=>{
+    if(seen[tr.id])return;
+    if(unlockedCount>=tr.threshold){
+      seen[tr.id]=todayISO();
+      changed=true;
+      if(!badgesBooting)pendingTrophyCelebrations.push(tr);
+    }
+  });
+  if(changed){d.trophiesSeen=seen;saveData(d);}
+  renderRankSection();
+  applyRankRing();
+}
+
+function renderRankSection(){
+  const container=document.getElementById('profile-rank-row');
+  if(!container)return;
+  const unlockedCount=Object.keys(getUnlockedBadges()).length;
+  const seen=getTrophiesSeen();
+  const cells=getTrophyMilestones().map(tr=>{
+    const earned=!!seen[tr.id];
+    const style=earned?'opacity:1;filter:none':'opacity:.35;filter:grayscale(1)';
+    return`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+      <div style="font-size:32px;line-height:1;${style}">${tr.emoji}</div>
+      <div style="font-size:8.5px;font-weight:700;color:${earned?'var(--text2)':'var(--text3)'};text-align:center;white-space:nowrap">${tr.shortName} (${tr.threshold===BADGES.length?'ALL':tr.threshold})</div>
+    </div>`;
+  }).join('');
+  container.innerHTML=`<div class="chart-card" style="display:flex;gap:4px">${cells}</div>`;
+}
+
+// multiple square particles burst outward from screen-center in every
+// direction at once — deliberately different from the falling/fanfare
+// confetti used for badge unlocks, so a rank-up reads as a distinct moment
+function launchTrophyConfetti(colors){
+  const count=44;
+  for(let i=0;i<count;i++){
+    const el=document.createElement('div');
+    el.className='trophy-particle';
+    const angle=(360/count)*i+(Math.random()*14-7);
+    el.style.setProperty('--rot',angle+'deg');
+    el.style.background=colors[Math.floor(Math.random()*colors.length)];
+    el.style.animationDelay=(Math.random()*0.12)+'s';
+    el.style.animationDuration=(0.75+Math.random()*0.45)+'s';
+    document.body.appendChild(el);
+    el.addEventListener('animationend',()=>el.remove());
+  }
+}
+
+function showNextTrophyCelebration(){
+  if(!pendingTrophyCelebrations.length)return;
+  const tr=pendingTrophyCelebrations.shift();
+  document.getElementById('trophy-unlock-emoji').textContent=tr.emoji;
+  document.getElementById('trophy-unlock-title').textContent=tr.name+' Unlocked!';
+  document.getElementById('trophy-unlock-desc').textContent=
+    tr.threshold===BADGES.length
+      ?`Incredible — you've unlocked every single badge in the app. Congratulations!`
+      :`You've unlocked ${tr.threshold} badges. Congratulations on reaching ${tr.name}!`;
+  openOv('ov-trophy-unlock');
+  launchTrophyConfetti(tr.colors);
+}
+
 function checkBadges(defer){
   const d=loadData();
   const unlocked=d.badgesUnlocked||{};
@@ -5051,6 +5740,7 @@ function checkBadges(defer){
     }
   });
   if(changed){d.badgesUnlocked=unlocked;saveData(d);}
+  checkTrophies(Object.keys(unlocked).length);
   renderBadgeSections();
   renderDashBadgeProgress();
   if(changed&&!defer&&!badgesBooting)showNextBadgeCelebration();
@@ -5074,7 +5764,12 @@ function badgeCircleStyle(color){
 }
 
 function showNextBadgeCelebration(){
-  if(!pendingBadgeCelebrations.length)return;
+  if(!pendingBadgeCelebrations.length){
+    // badge queue drained — any newly-crossed rank trophy shows next, so
+    // "badge earned" and "rank up" never compete for the screen at once
+    showNextTrophyCelebration();
+    return;
+  }
   const b=pendingBadgeCelebrations.shift();
   const circle=document.getElementById('badge-unlock-circle');
   circle.style.cssText='width:88px;height:88px;margin:0 auto 12px;font-size:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;'+badgeCircleStyle(b.color);
@@ -5089,7 +5784,7 @@ function renderBadgeSections(){
   if(!container)return;
   const unlocked=getUnlockedBadges();
   const cats=[...new Set(BADGES.map(b=>b.cat))];
-  const catEmoji={'Training Consistency':'🏋️','Planning':'📅','Strength Milestones':'🏆','Perfect Rests':'⏱️','Discipline':'🔻','Body Tracking':'📏','Personalization':'🛠️','Clean Eating':'🥗'};
+  const catEmoji={'Training Consistency':'🏋️','Planning':'📅','Strength Milestones':'🏆','Perfect Rests':'⏱️','Discipline':'🔻','Body Tracking':'📏','Personalization':'🛠️','Clean Eating':'🥗','Post-Workout Cardio':'🏃','Personal Trainer':'🎓'};
   let unlockedCount=0;
 
   const html=cats.map(cat=>{
@@ -5106,7 +5801,7 @@ function renderBadgeSections(){
         ${isUnlocked?'':`<div style="font-size:8px;color:var(--text3);font-weight:700;margin-top:1px">${Math.min(current,target)}/${target}</div>`}
       </div>`;
     }).join('');
-    return`<div class="slabel">${catEmoji[cat]||''} ${cat}</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:.5rem">${tiles}</div>`;
+    return`<div class="slabel">${catEmoji[cat]||''} ${cat}</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:.5rem">${tiles}</div>`;
   }).join('');
 
   container.innerHTML=html;
@@ -5263,6 +5958,27 @@ function refreshAvatarDisplays(){
   const profileBtn=document.getElementById('profile-avatar-btn');
   // the ✏️ badge now lives in the wrapper as a sibling, so it isn't overwritten here
   if(profileBtn)profileBtn.innerHTML=avatarInnerHTML(profile,48);
+  applyRankRing();
+}
+
+// the header avatar gets a colored ring matching the highest rank trophy
+// earned so far, and Champion additionally flanks it with two 🏆
+function applyRankRing(){
+  const headerBtn=document.getElementById('header-avatar-btn');
+  const trophyL=document.getElementById('header-trophy-left');
+  const trophyR=document.getElementById('header-trophy-right');
+  if(!headerBtn)return;
+  const seen=getTrophiesSeen();
+  const RING_COLORS={bronze:'#cd7f32',silver:'#c0c0c0',gold:'#ffd700',champion:'#ffd700'};
+  // highest rank wins — champion > gold > silver > bronze
+  let rank=null;
+  ['champion','gold','silver','bronze'].forEach(id=>{if(!rank&&seen[id])rank=id;});
+  headerBtn.style.borderWidth=rank?'2.5px':'1.5px';
+  headerBtn.style.borderColor=rank?RING_COLORS[rank]:'var(--border2)';
+  headerBtn.style.boxShadow=rank?`0 0 6px ${RING_COLORS[rank]}80`:'none';
+  const showTrophies=rank==='champion';
+  if(trophyL){trophyL.style.display=showTrophies?'block':'none';trophyL.textContent=showTrophies?'🏆':'';}
+  if(trophyR){trophyR.style.display=showTrophies?'block':'none';trophyR.textContent=showTrophies?'🏆':'';}
 }
 
 function openAvatarPicker(){
@@ -5429,7 +6145,8 @@ function renderProfileWeekBanner(){
     const isToday=key===todayKey;
     const entry=entries[key];
 
-    let cellStyle=`background:var(--bg4);border:1.5px solid var(--border2);`;
+    const isWeekend=i>=5;
+    let cellStyle=isWeekend?`background:#2f2f2f;border:1.5px solid var(--border2);`:`background:var(--bg4);border:1.5px solid var(--border2);`;
     let emojiHtml='';
     let deloadMark='';
     let cheatMealMark='';
@@ -5581,6 +6298,7 @@ function profileInit(){
   refreshAvatarDisplays();
   renderAccentColorRow();
   renderProfileWeekBanner();
+  renderRankSection();
   checkBadges();
 }
 
@@ -5776,7 +6494,7 @@ function renderLineChartCard(metric,months,values,neighbours){
   </div>`;
 }
 
-function renderTrainingPie(containerId){
+function renderTrainingPie(containerId,animate){
   const container=document.getElementById(containerId||'charts-training-pie');
   if(!container)return;
   const entries=calLoad();
@@ -5791,16 +6509,17 @@ function renderTrainingPie(containerId){
 
   const R=54,C=2*Math.PI*R;
   const trainedLen=(trainedDays/Math.max(daysElapsed,1))*C;
+  const arcId='pie-arc-'+(containerId||'default');
+  const pctId='pie-pct-'+(containerId||'default');
 
   container.innerHTML=`
     <div class="chart-card" style="display:flex;align-items:center;gap:1rem">
       <svg viewBox="0 0 140 140" style="width:120px;height:120px;flex-shrink:0">
         <circle cx="70" cy="70" r="${R}" fill="none" stroke="var(--bg4)" stroke-width="16"/>
-        <circle cx="70" cy="70" r="${R}" fill="none" stroke="var(--green)" stroke-width="16"
-          stroke-dasharray="${trainedLen.toFixed(1)} ${C.toFixed(1)}"
+        <circle cx="70" cy="70" r="${R}" fill="none" stroke="var(--green)" stroke-width="16" id="${arcId}"
+          stroke-dasharray="${animate?'0':trainedLen.toFixed(1)} ${C.toFixed(1)}"
           stroke-linecap="round" transform="rotate(-90 70 70)"/>
-        <text x="70" y="63" dominant-baseline="central" font-size="22" font-weight="800" fill="var(--text)" text-anchor="middle">${Math.round(pct)}%</text>
-        <text x="70" y="80" dominant-baseline="central" font-size="9" fill="var(--text3)" text-anchor="middle">trained</text>
+        <text x="70" y="70" dominant-baseline="central" text-anchor="middle" font-size="30" font-weight="800" fill="var(--text)" id="${pctId}">${animate?0:Math.round(pct)}%</text>
       </svg>
       <div style="flex:1;min-width:0">
         <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">${trainedDays} of ${daysElapsed} days this year</div>
@@ -5810,6 +6529,25 @@ function renderTrainingPie(containerId){
         </div>
       </div>
     </div>`;
+
+  if(animate){
+    const arcEl=document.getElementById(arcId);
+    const pctEl=document.getElementById(pctId);
+    const start=performance.now();
+    const duration=800;
+    function tick(now){
+      const t=Math.min(1,(now-start)/duration);
+      const eased=1-Math.pow(1-t,3);
+      if(arcEl)arcEl.setAttribute('stroke-dasharray',`${(trainedLen*eased).toFixed(1)} ${C.toFixed(1)}`);
+      if(pctEl)pctEl.textContent=Math.round(pct*eased)+'%';
+      if(t<1)requestAnimationFrame(tick);
+      else{
+        if(arcEl)arcEl.setAttribute('stroke-dasharray',`${trainedLen.toFixed(1)} ${C.toFixed(1)}`);
+        if(pctEl)pctEl.textContent=Math.round(pct)+'%';
+      }
+    }
+    requestAnimationFrame(tick);
+  }
 }
 
 // ── Training Type Breakdown (pie) ──
@@ -6281,12 +7019,41 @@ function renderWeightBFCombo(){
 // ══════════════════════════════════════════
 // DASHBOARD
 // ══════════════════════════════════════════
+// ══════════════════════════════════════════
+// DASHBOARD FIRST-LOAD ANIMATIONS
+// sessionStorage is the closest signal available for "the app was actually
+// closed and relaunched" vs "just backgrounded/switched tabs" — it survives
+// normal PWA backgrounding (the WebView process usually stays alive) but gets
+// cleared when iOS actually terminates the app and it's launched fresh.
+// ══════════════════════════════════════════
+function shouldAnimateDashboard(){
+  if(sessionStorage.getItem('dashAnimated'))return false;
+  sessionStorage.setItem('dashAnimated','1');
+  return true;
+}
+
+function animateCountUp(elId,target,duration){
+  const el=document.getElementById(elId);
+  if(!el)return;
+  if(!target){el.textContent='0';return;}
+  const start=performance.now();
+  function tick(now){
+    const t=Math.min(1,(now-start)/duration);
+    const eased=1-Math.pow(1-t,3);// ease-out cubic — fast start, gentle finish
+    el.textContent=Math.round(target*eased);
+    if(t<1)requestAnimationFrame(tick);
+    else el.textContent=target;
+  }
+  requestAnimationFrame(tick);
+}
+
 function dashboardInit(){
+  const animate=shouldAnimateDashboard();
   renderLastTraining();
   renderNextPlanned();
-  renderStreaks();
+  renderStreaks(animate);
   renderLastDeload();
-  renderDashTrainingDays();
+  renderDashTrainingDays(animate);
   renderWeeklyFrequency('dash-weekly-freq');
   renderDashBadgeProgress();
   renderDashCleanDays();
@@ -6318,7 +7085,7 @@ function renderLastTraining(){
   const diff=daysFromToday(key);// <=0
   const daysAgo=-diff;
   const daysLabel=diff===0?'<b>Today</b>':(`<b>${daysAgo}</b> day${daysAgo===1?'':'s'} ago`);
-  container.innerHTML=renderDashEntryCard(key,entries[key],false,daysLabel,false);
+  container.innerHTML=renderDashEntryCard(key,entries[key],false,daysLabel,'viewSummary');
 }
 
 function renderNextPlanned(){
@@ -6333,21 +7100,26 @@ function renderNextPlanned(){
   const key=plannedKeys[0];
   const diff=daysFromToday(key);// >=0
   const daysLabel=diff===0?'<b>Today</b>':(`in <b>${diff}</b> day${diff===1?'':'s'}`);
-  container.innerHTML=renderDashEntryCard(key,entries[key],true,daysLabel,true);
+  container.innerHTML=renderDashEntryCard(key,entries[key],true,daysLabel,'jumpToTab');
 }
 
 const TYPE_NAME_PLAIN={push:'Push',pull:'Pull',legs:'Legs',all:'Whole Body',cardio:'Cardio',other:'Other'};
 const TYPE_TO_PAGE={push:'push',pull:'pull',legs:'legs',all:'all'};
 
-function renderDashEntryCard(key,e,dashed,daysLabel,clickable){
+function renderDashEntryCard(key,e,dashed,daysLabel,clickMode){
   const tc=TYPE_CAL[e.type]||TYPE_CAL.other;
   const d=new Date(key+'T12:00:00');
   const dateStr=d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   const deloadTag=e.deload?'<span class="cal-entry-deload-tag" style="margin-left:6px">DELOAD</span>':'';
   const border=dashed?`3px dashed ${tc.color}`:`1.5px solid ${tc.color}`;
   const daysBlock=daysLabel?`<div style="flex-shrink:0;text-align:right;font-size:17px;font-weight:500;color:${tc.color};line-height:1.15;white-space:nowrap">${daysLabel}</div>`:'';
-  const targetPage=clickable?TYPE_TO_PAGE[e.type]:null;
-  const clickAttr=targetPage?` onclick="sw('${targetPage}')" style="cursor:pointer"`:'';
+  let clickAttr='';
+  if(clickMode==='jumpToTab'){
+    const targetPage=TYPE_TO_PAGE[e.type];
+    if(targetPage)clickAttr=` onclick="sw('${targetPage}')" style="cursor:pointer"`;
+  } else if(clickMode==='viewSummary'){
+    clickAttr=` onclick="viewSavedSessionSummary('${key}')" style="cursor:pointer"`;
+  }
   return`<div class="chart-card" style="border:${border}"${clickAttr}>
     <div style="display:flex;align-items:center;gap:10px">
       <span style="font-size:24px;line-height:1">${tc.emoji}</span>
@@ -6359,6 +7131,15 @@ function renderDashEntryCard(key,e,dashed,daysLabel,clickable){
       ${daysBlock}
     </div>
   </div>`;
+}
+
+// switches to the Calendar tab and scrolls its month view to whichever month
+// contains the given date key
+function jumpToCalendarMonth(dateKey){
+  const d=new Date(dateKey+'T12:00:00');
+  calYear=d.getFullYear();
+  calMonth=d.getMonth();
+  sw('cal');
 }
 
 function renderLastDeload(){
@@ -6376,9 +7157,10 @@ function renderLastDeload(){
   const diffDays=-daysFromToday(key);
   const weeks=Math.floor(diffDays/7);
   const weeksLabel=weeks===0?'less than 1 week':(weeks+' week'+(weeks===1?'':'s'));
-  container.innerHTML=`<div class="chart-card" style="margin-bottom:0;padding:.6rem .9rem;display:flex;align-items:center;justify-content:center;gap:6px">
+  container.innerHTML=`<div class="chart-card" style="margin-bottom:0;padding:.6rem .9rem;display:flex;align-items:center;justify-content:center;gap:6px;position:relative;cursor:pointer" onclick="jumpToCalendarMonth('${key}')">
     <span style="font-size:11px;color:var(--text3)">🔻 Last deload:</span>
     <span style="font-size:12px;font-weight:800;color:var(--red)">${weeksLabel} ago</span>
+    <span style="position:absolute;top:50%;right:10px;transform:translateY(-50%);font-size:12px;color:var(--text3)">›</span>
   </div>`;
 }
 
@@ -6427,34 +7209,40 @@ function computeWeekStreaks(){
   return{streak3:streakAtLeast(3),streak2:streakAtLeast(2)};
 }
 
-function renderStreaks(){
+function renderStreaks(animate){
   const container=document.getElementById('dash-streaks');
   if(!container)return;
   const{streak3,streak2}=computeWeekStreaks();
   container.innerHTML=`
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
       <div class="chart-card" style="text-align:center;margin-bottom:0">
-        <div style="font-size:26px;font-weight:800;color:var(--orange)">${streak3}</div>
+        <div style="font-size:26px;font-weight:800;color:var(--orange)" id="dash-streak3-num">${animate?0:streak3}</div>
         <div style="font-size:10px;color:var(--text3);margin-top:2px;line-height:1.4">weeks with <span style="color:var(--orange);font-weight:700">3+</span> trainings in a row</div>
       </div>
       <div class="chart-card" style="text-align:center;margin-bottom:0">
-        <div style="font-size:26px;font-weight:800;color:var(--blue)">${streak2}</div>
+        <div style="font-size:26px;font-weight:800;color:var(--blue)" id="dash-streak2-num">${animate?0:streak2}</div>
         <div style="font-size:10px;color:var(--text3);margin-top:2px;line-height:1.4">weeks with <span style="color:var(--blue);font-weight:700">2+</span> trainings in a row</div>
       </div>
     </div>`;
+  if(animate){
+    animateCountUp('dash-streak3-num',streak3,700);
+    animateCountUp('dash-streak2-num',streak2,700);
+  }
 }
 
-function renderDashTrainingDays(){
+function renderDashTrainingDays(animate){
   const container=document.getElementById('dash-training-days');
   if(!container)return;
   const total=Object.values(calLoad()).filter(e=>e.status==='done'&&!e.dietOnly).length;
   container.innerHTML=`
-    <div class="chart-card" style="text-align:center;margin-bottom:.7rem">
-      <div style="font-size:36px;font-weight:800;color:var(--orange);line-height:1">${total}</div>
+    <div class="chart-card" style="text-align:center;margin-bottom:.7rem;position:relative;cursor:pointer" onclick="sw('cal')">
+      <span style="position:absolute;top:10px;right:12px;font-size:12px;color:var(--text3)">›</span>
+      <div style="font-size:36px;font-weight:800;color:var(--orange);line-height:1" id="dash-total-days-num">${animate?0:total}</div>
       <div style="font-size:11px;color:var(--text3);margin-top:4px;font-weight:600;letter-spacing:.03em;text-transform:uppercase">Total Training Days Logged</div>
     </div>
     <div id="dash-pie-inner"></div>`;
-  renderTrainingPie('dash-pie-inner');
+  if(animate)animateCountUp('dash-total-days-num',total,700);
+  renderTrainingPie('dash-pie-inner',animate);
 }
 
 // maps a weight-storage uid (e.g. "bench-0") back to its exercise display name
@@ -6955,10 +7743,69 @@ function buildRecordLogEntries(){
   return rows;
 }
 
+let recordLogSearchQuery='';
+let recordLogSelectMode=false;
+let recordLogSelected=new Set();// keys: "dataU|field|idx"
+
 function openRecordLog(){
   recordLogPage=0;
+  recordLogSearchQuery='';
+  recordLogSelectMode=false;
+  recordLogSelected=new Set();
+  const search=document.getElementById('record-log-search');
+  if(search)search.value='';
   renderRecordLog();
   openOv('ov-record-log');
+}
+
+function recordLogOnSearch(){
+  recordLogSearchQuery=(document.getElementById('record-log-search')?.value||'').trim().toLowerCase();
+  recordLogPage=0;
+  renderRecordLog();
+}
+
+function recordLogToggleSelectMode(){
+  recordLogSelectMode=!recordLogSelectMode;
+  if(!recordLogSelectMode)recordLogSelected=new Set();
+  const toggle=document.getElementById('record-log-select-toggle');
+  const selectAllBtn=document.getElementById('record-log-select-all-btn');
+  const delBtn=document.getElementById('record-log-delete-selected');
+  if(toggle)toggle.textContent=recordLogSelectMode?'✕ Cancel':'☑️ Select';
+  if(selectAllBtn)selectAllBtn.style.display=recordLogSelectMode?'inline':'none';
+  if(delBtn)delBtn.style.display=recordLogSelectMode?'block':'none';
+  renderRecordLog();
+}
+
+function recordLogUpdateSelectedCount(){
+  const btn=document.getElementById('record-log-delete-selected');
+  if(btn)btn.textContent=`🗑 Delete (${recordLogSelected.size})`;
+}
+
+function recordLogToggleRow(key){
+  if(recordLogSelected.has(key))recordLogSelected.delete(key);
+  else recordLogSelected.add(key);
+  recordLogUpdateSelectedCount();
+  const row=document.querySelector(`[data-rlkey="${key}"]`);
+  if(row){
+    const isSelected=recordLogSelected.has(key);
+    row.classList.toggle('rl-selected',isSelected);
+    const check=row.querySelector('.rl-select-check');
+    if(check)check.textContent=isSelected?'✅':'⬜';
+  }
+}
+
+// selects every record matching the current search across ALL pages, not just
+// the one currently visible
+function recordLogSelectAll(){
+  const all=buildRecordLogEntries().filter(recordLogMatchesSearch);
+  all.forEach(r=>recordLogSelected.add(`${r.dataU}|${r.field}|${r.idx}`));
+  recordLogUpdateSelectedCount();
+  renderRecordLog();
+}
+
+function recordLogMatchesSearch(r){
+  if(!recordLogSearchQuery)return true;
+  return r.name.toLowerCase().includes(recordLogSearchQuery);
 }
 
 function renderRecordLog(){
@@ -6967,14 +7814,16 @@ function renderRecordLog(){
   const nav=document.getElementById('record-log-nav');
   if(!body)return;
 
-  const all=buildRecordLogEntries();
+  const all=buildRecordLogEntries().filter(recordLogMatchesSearch);
   const totalPages=Math.max(1,Math.ceil(all.length/RECORD_LOG_PAGE_SIZE));
   if(recordLogPage>totalPages-1)recordLogPage=totalPages-1;
   if(recordLogPage<0)recordLogPage=0;
 
   if(!all.length){
     if(countEl)countEl.textContent='';
-    body.innerHTML='<div class="cal-empty-msg">No SB or PB records yet. They\'ll appear here as you log new bests.</div>';
+    body.innerHTML=recordLogSearchQuery
+      ?`<div class="cal-empty-msg">No records match "${recordLogSearchQuery}".</div>`
+      :'<div class="cal-empty-msg">No SB or PB records yet. They\'ll appear here as you log new bests.</div>';
     if(nav)nav.innerHTML='';
     return;
   }
@@ -6982,12 +7831,27 @@ function renderRecordLog(){
   const start=recordLogPage*RECORD_LOG_PAGE_SIZE;
   const pageRows=all.slice(start,start+RECORD_LOG_PAGE_SIZE);
 
-  if(countEl)countEl.textContent=`${all.length} record${all.length===1?'':'s'} · showing ${start+1}–${start+pageRows.length}`;
+  if(countEl)countEl.textContent=`${all.length} record${all.length===1?'':'s'}${recordLogSearchQuery?' matching search':''} · showing ${start+1}–${start+pageRows.length}`;
 
   body.innerHTML=pageRows.map(r=>{
     const d=new Date(r.date+'T12:00:00');
     const dateStr=d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'2-digit'});
     const typeBadge=r.type?`<span class="type-badge type-${r.type}" style="font-size:8px;padding:1px 3px;margin-left:0">${r.typeBadge}</span>`:'';
+    const key=`${r.dataU}|${r.field}|${r.idx}`;
+    const isSelected=recordLogSelected.has(key);
+    if(recordLogSelectMode){
+      return`<div class="rl-swipe-item">
+        <div class="rl-row rl-selectable${isSelected?' rl-selected':''}" data-rlkey="${key}" onclick="recordLogToggleRow('${key}')">
+          <span class="rl-select-check">${isSelected?'✅':'⬜'}</span>
+          <span class="rl-date">${dateStr}</span>
+          <span class="rl-emoji">${r.emoji}</span>
+          <span class="rl-kind ${r.field}">${r.field.toUpperCase()}</span>
+          <span class="rl-name">${r.name}</span>
+          <span class="rl-type">${typeBadge}</span>
+          <span class="rl-weight">${r.value} kg</span>
+        </div>
+      </div>`;
+    }
     return`<div class="rl-swipe-item">
       <div class="rl-swipe-actions">
         <div class="rl-swipe-edit-bg" onclick="recordLogAskEdit('${r.dataU}','${r.field}',${r.idx})">✏️</div>
@@ -7011,7 +7875,8 @@ function renderRecordLog(){
       <button class="swipe-btn" onclick="recordLogPageShift(-1)" ${recordLogPage>0?'':'disabled style="opacity:.35"'}>Newer ›</button>
     `;
   }
-  attachRecordLogSwipeHandlers();
+  recordLogUpdateSelectedCount();
+  if(!recordLogSelectMode)attachRecordLogSwipeHandlers();
 }
 
 function recordLogPageShift(delta){
@@ -7173,6 +8038,46 @@ function doRecordDelete(){
   }
   recordLogPendingDelete=null;
   closeOv('ov-record-del');
+  renderRecordLog();
+  checkBadges();
+}
+
+function recordLogAskBulkDelete(){
+  if(!recordLogSelected.size)return;
+  const label=document.getElementById('record-bulk-del-label');
+  if(label)label.textContent=`This will permanently delete ${recordLogSelected.size} record${recordLogSelected.size===1?'':'s'}. This cannot be undone.`;
+  openOv('ov-record-bulk-del');
+}
+
+function doRecordBulkDelete(){
+  // group by dataU+field, then splice from HIGHEST index down to lowest within
+  // each group — deleting low-to-high would shift later indices out from under us
+  const groups={};
+  recordLogSelected.forEach(key=>{
+    const[dataU,field,idxStr]=key.split('|');
+    const gk=dataU+'|'+field;
+    (groups[gk]=groups[gk]||{dataU,field,idxs:[]}).idxs.push(parseInt(idxStr));
+  });
+  Object.values(groups).forEach(({dataU,field,idxs})=>{
+    const w=weights[dataU];
+    if(!w)return;
+    const hist=field==='sb'?w.sbHistory:w.pbHistory;
+    if(!hist)return;
+    idxs.sort((a,b)=>b-a);// descending — highest index first
+    idxs.forEach(idx=>{if(hist[idx])hist.splice(idx,1)});
+    recalcCurrentFromHistory(dataU,field);
+    refreshPillsEverywhere(dataU);
+  });
+  persistAll();
+  recordLogSelected=new Set();
+  recordLogSelectMode=false;
+  const toggle=document.getElementById('record-log-select-toggle');
+  const selectAllBtn=document.getElementById('record-log-select-all-btn');
+  const delBtn=document.getElementById('record-log-delete-selected');
+  if(toggle)toggle.textContent='☑️ Select';
+  if(selectAllBtn)selectAllBtn.style.display='none';
+  if(delBtn)delBtn.style.display='none';
+  closeOv('ov-record-bulk-del');
   renderRecordLog();
   checkBadges();
 }
@@ -7521,7 +8426,12 @@ function saveTipsContent(){
   const dataU=dataUidOf(tipsCurrentU);
   d.tips[dataU]=html;
   d.tipsYt[dataU]=ytUrl;
+  // every non-empty save counts toward the Personal Trainer badges — same
+  // "count every edit action" precedent as the exercise-customization badges
+  if(html&&html.trim())d.customInstructionCount=(d.customInstructionCount||0)+1;
+  if(ytUrl)d.youtubeLinkCount=(d.youtubeLinkCount||0)+1;
   saveData(d);
+  checkBadges();
   document.getElementById('tips-content').innerHTML=html;
   // update YouTube button visibility
   const ytBtn=document.getElementById('tips-yt-btn');
@@ -7555,6 +8465,7 @@ checkBodyStatsReminder();
 // first launch only — shown last so the app is fully rendered behind it
 if(shouldShowOnboarding())setTimeout(startOnboarding,300);
 renderDay('push');renderDay('pull');renderDay('legs');renderDay('all');
+renderAllCardioCards();
 Object.keys(weights).forEach(u=>refreshPillsEverywhere(u));
 requestWakeLock();
 // pre-warm the Render notification relay server at boot — its free tier goes to
