@@ -5833,18 +5833,41 @@ function getTrophyMilestones(){
     {id:'champion',threshold:total,emoji:'🏆',name:'Champion Rank',shortName:'Champion',colors:['#cd7f32','#c0c0c0','#ffd700','#e8e8e8']},
   ];
 }
+// trophiesSeen records which trophies have ALREADY POPPED A CELEBRATION — it is
+// deliberately NOT the source of truth for whether a trophy is currently earned.
+// Thresholds are percentage-based and shift whenever badges are added, so a flag
+// written under older thresholds would otherwise permanently over-award a rank
+// (e.g. Silver saved at 25 badges back when that was its threshold, then staying
+// lit after Silver moved to 50).
 function getTrophiesSeen(){return loadData().trophiesSeen||{}}
+
+// the live answer: which trophies does the CURRENT badge count actually earn
+function getEarnedTrophies(){
+  const unlockedCount=Object.keys(getUnlockedBadges()).length;
+  const earned={};
+  getTrophyMilestones().forEach(tr=>{
+    if(unlockedCount>=tr.threshold)earned[tr.id]=true;
+  });
+  return earned;
+}
 
 function checkTrophies(unlockedCount){
   const d=loadData();
   const seen=d.trophiesSeen||{};
   let changed=false;
   getTrophyMilestones().forEach(tr=>{
-    if(seen[tr.id])return;
-    if(unlockedCount>=tr.threshold){
+    const isEarnedNow=unlockedCount>=tr.threshold;
+    if(isEarnedNow){
+      if(seen[tr.id])return;// already celebrated
       seen[tr.id]=todayISO();
       changed=true;
       if(!badgesBooting)pendingTrophyCelebrations.push(tr);
+    } else if(seen[tr.id]){
+      // flag was written under an older (lower) threshold but the rank isn't
+      // actually earned any more — drop it so the trophy shows as locked and
+      // can celebrate properly once the real threshold is reached
+      delete seen[tr.id];
+      changed=true;
     }
   });
   if(changed){d.trophiesSeen=seen;saveData(d);}
@@ -5875,7 +5898,7 @@ function renderRankSection(){
   if(!container)return;
   const unlockedCount=Object.keys(getUnlockedBadges()).length;
   const total=BADGES.length;
-  const seen=getTrophiesSeen();
+  const seen=getEarnedTrophies();// live, not the persisted celebration flag
   const ms=getTrophyMilestones();
   const barPct=badgeCountToBarPct(unlockedCount);
 
@@ -6220,7 +6243,7 @@ function applyRankRing(){
   const trophyL=document.getElementById('header-trophy-left');
   const trophyR=document.getElementById('header-trophy-right');
   if(!headerBtn)return;
-  const seen=getTrophiesSeen();
+  const seen=getEarnedTrophies();// live check keeps the ring in sync with the trophies
   const RING_COLORS={bronze:'#cd7f32',silver:'#c0c0c0',gold:'#ffd700',champion:'#ffd700'};
   // highest rank wins — champion > gold > silver > bronze
   let rank=null;
