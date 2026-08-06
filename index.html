@@ -4335,9 +4335,9 @@ function buildSessionSummary(day){
       lt,repsMin:repsRange.min,repsMax:repsRange.max,volMin,volMax
     });
 
-    if(w.sbDate===todayStr)newRecords.push({name:info.name,emoji:info.emoji,type:info.type,typeBadge:info.typeBadge,kind:'SB'});
-    if(w.pbDate===todayStr)newRecords.push({name:info.name,emoji:info.emoji,type:info.type,typeBadge:info.typeBadge,kind:'PB'});
-    if(w.increase===true)increased.push({name:info.name,emoji:info.emoji,type:info.type,typeBadge:info.typeBadge});
+    if(w.sbDate===todayStr)newRecords.push({name:info.name,emoji:info.emoji,type:info.type,typeBadge:info.typeBadge,kind:'SB',value:w.sb});
+    if(w.pbDate===todayStr)newRecords.push({name:info.name,emoji:info.emoji,type:info.type,typeBadge:info.typeBadge,kind:'PB',value:w.pb});
+    if(w.increase===true)increased.push({name:info.name,emoji:info.emoji,type:info.type,typeBadge:info.typeBadge,value:lt});
   });
 
   return{day,items,totalMin,totalMax,newRecords,increased,exerciseCount:items.length};
@@ -4370,8 +4370,8 @@ function buildSessionSummaryHTML(day,s){
           // session every exercise is already from THAT day, so the exercise's
           // own type (compound/isolation/finisher/abs) is more informative.
           const iconCell=day==='all'
-            ?`<td style="padding:6px 8px;text-align:center;font-size:13px;width:24px">${it.emoji}</td>`
-            :`<td style="padding:6px 8px;text-align:center;width:34px"><span class="type-badge type-${it.type}" style="font-size:8px;padding:2px 4px">${it.typeBadge}</span></td>`;
+            ?`<td style="padding:6px 8px;text-align:center;font-size:13px;width:24px">${it.emoji||''}</td>`
+            :`<td style="padding:6px 8px;text-align:center;width:34px"><span class="type-badge type-${it.type||'k'}" style="font-size:8px;padding:2px 4px">${it.typeBadge||'—'}</span></td>`;
           return`<tr style="border-top:1px solid var(--border)">
           ${iconCell}
           <td style="padding:6px 8px;color:var(--text)">${it.name}</td>
@@ -4386,24 +4386,33 @@ function buildSessionSummaryHTML(day,s){
   // badge/emoji sits centered in its own cell instead of pushing the following
   // text around by a variable amount, which is what caused the misaligned
   // columns in New Records / Marked to Increase before
+  // `||` guards cover summaries snapshotted by earlier versions of the app,
+  // whose records were saved without the type fields — without this they'd
+  // render the literal text "undefined"
   const iconForGrid=r=>day==='all'
-    ?`<span style="font-size:15px">${r.emoji}</span>`
-    :`<span class="type-badge type-${r.type}" style="font-size:8px;padding:1px 4px;margin:0">${r.typeBadge}</span>`;
+    ?`<span style="font-size:15px">${r.emoji||''}</span>`
+    :`<span class="type-badge type-${r.type||'k'}" style="font-size:8px;padding:1px 4px;margin:0">${r.typeBadge||'—'}</span>`;
+
+  const weightCell=r=>r.value!=null
+    ?`<span style="color:var(--text2);white-space:nowrap;font-weight:700">${r.value} kg</span>`
+    :`<span style="color:var(--text3)">—</span>`;
 
   const recordsHtml=s.newRecords.length?`<div class="chart-card" style="margin-bottom:.8rem">
     <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:.5rem">🏆 New Records</div>
-    ${s.newRecords.map(r=>`<div style="display:grid;grid-template-columns:44px 26px 1fr;align-items:center;gap:8px;padding:3px 0;font-size:12px;color:var(--text2)">
+    ${s.newRecords.map(r=>`<div style="display:grid;grid-template-columns:44px 26px 1fr auto;align-items:center;gap:8px;padding:3px 0;font-size:12px;color:var(--text2)">
       <div>${iconForGrid(r)}</div>
       <strong style="color:${r.kind==='PB'?'#22c55e':'#eab308'}">${r.kind}</strong>
       <span>${r.name}</span>
+      ${weightCell(r)}
     </div>`).join('')}
   </div>`:'';
 
   const increasedHtml=s.increased.length?`<div class="chart-card" style="margin-bottom:.8rem">
     <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:.5rem">⬆️ Marked to Increase Next Time</div>
-    ${s.increased.map(r=>`<div style="display:grid;grid-template-columns:44px 1fr;align-items:center;gap:8px;padding:3px 0;font-size:12px;color:var(--text2)">
+    ${s.increased.map(r=>`<div style="display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:8px;padding:3px 0;font-size:12px;color:var(--text2)">
       <div>${iconForGrid(r)}</div>
       <span>${r.name}</span>
+      ${weightCell(r)}
     </div>`).join('')}
   </div>`:'';
 
