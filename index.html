@@ -933,8 +933,14 @@ tr[onclick]:active,.rl-row:active{
   <div class="diet-section">
     <div id="diet-clean-days-stat" style="margin-bottom:1.2rem"></div>
     <button class="clean-day-btn" onclick="markTodayCleanDay()">🥗 Mark Today as a Clean Day</button>
+
+    <div class="slabel" style="margin-top:1.2rem">🥗 Clean Days per Month</div>
+    <div id="diet-clean-days-chart"></div>
+    <div id="diet-clean-days-chart-nav" style="display:flex;align-items:center;justify-content:space-between;margin-top:.3rem"></div>
+    <div id="diet-clean-days-chart-today" style="text-align:center;margin-top:.4rem;min-height:1px"></div>
+
     <div id="diet-bodystats-nudge"></div>
-    <div class="slabel" style="margin-top:0">Your Stats</div>
+    <div class="slabel" style="margin-top:1.4rem">Your Stats</div>
     <div class="diet-input-row">
       <div><div class="diet-label">Age</div><input class="diet-input" id="d-age" type="text" inputmode="decimal" placeholder="35"></div>
       <div><div class="diet-label">Weight (kg)</div><input class="diet-input" id="d-weight" type="text" inputmode="decimal" placeholder="80,5"><div class="diet-source-note" id="d-weight-note"></div></div>
@@ -992,11 +998,6 @@ tr[onclick]:active,.rl-row:active{
     · Fat: minimum 0.8 g/kg for hormonal health, don't go below<br>
     · Weigh yourself weekly (same day, same time) — 4-week average matters more than daily fluctuation</div>
   </div>
-
-  <div class="slabel" style="margin-top:1.4rem">🥗 Clean Days per Month</div>
-  <div id="diet-clean-days-chart"></div>
-  <div id="diet-clean-days-chart-nav" style="display:flex;align-items:center;justify-content:space-between;margin-top:.3rem"></div>
-  <div id="diet-clean-days-chart-today" style="text-align:center;margin-top:.4rem;min-height:1px"></div>
 
   <div class="slabel" style="margin-top:1.4rem">💊 Supplementation Guide</div>
   <div class="info-box" style="margin-bottom:.8rem">
@@ -5743,10 +5744,10 @@ const BADGES=[
 
   {id:'deload_discipline',cat:'Discipline',color:'red',emoji:'🔻',name:'Deload Discipline',desc:'Log your first deload week.',calc:()=>({current:getDeloadCount(),target:1})},
   {id:'cycle_complete',cat:'Discipline',color:'red',emoji:'🔄',name:'Cycle Complete',desc:'3 deload weeks logged.',calc:()=>({current:getDeloadCount(),target:3})},
-  {id:'deload_cycle_2',cat:'Discipline',color:'red',emoji:'🔁',name:'2nd Deload Cycle',desc:'4 deload weeks logged.',calc:()=>({current:getDeloadCount(),target:4})},
-  {id:'deload_cycle_3',cat:'Discipline',color:'red',emoji:'♻️',name:'3rd Deload Cycle',desc:'7 deload weeks logged.',calc:()=>({current:getDeloadCount(),target:7})},
-  {id:'deload_master',cat:'Discipline',color:'red',emoji:'🛡️',name:'Deload Master',desc:'10 deload weeks logged.',calc:()=>({current:getDeloadCount(),target:10})},
-  {id:'deload_champion',cat:'Discipline',color:'red',emoji:'🏅',name:'Deload Champion',desc:'20 deload weeks logged.',calc:()=>({current:getDeloadCount(),target:20})},
+  {id:'deload_cycle_2',cat:'Discipline',color:'red',emoji:'🔁',name:'2nd Deload Cycle',desc:'6 deload weeks logged.',calc:()=>({current:getDeloadCount(),target:6})},
+  {id:'deload_cycle_3',cat:'Discipline',color:'red',emoji:'♻️',name:'3rd Deload Cycle',desc:'9 deload weeks logged.',calc:()=>({current:getDeloadCount(),target:9})},
+  {id:'deload_master',cat:'Discipline',color:'red',emoji:'🛡️',name:'Deload Master',desc:'12 deload weeks logged.',calc:()=>({current:getDeloadCount(),target:12})},
+  {id:'deload_champion',cat:'Discipline',color:'red',emoji:'🏅',name:'Deload Champion',desc:'24 deload weeks logged.',calc:()=>({current:getDeloadCount(),target:24})},
   {id:'comeback_short',cat:'Discipline',color:'red',emoji:'👋',name:'Back At It',desc:'Log a session after a 7+ day gap. Welcome back!',calc:()=>({current:hasComebackEver(7)?1:0,target:1})},
   {id:'comeback',cat:'Discipline',color:'red',emoji:'🙌',name:'The Comeback',desc:'Log a session after a 14+ day gap. Welcome back!',calc:()=>({current:hasComebackEver(14)?1:0,target:1})},
   {id:'perfect_week',cat:'Discipline',color:'purple',emoji:'📅',name:'Perfect Week',desc:'Complete every planned session in a single week.',calc:()=>({current:hasPerfectWeekEver()?1:0,target:1})},
