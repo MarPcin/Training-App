@@ -362,6 +362,8 @@ tr[onclick]:active,.rl-row:active{
 .cardio-actions{display:flex;gap:7px}
 .cardio-add-btn{flex:0 0 auto;padding:9px 11px;border-radius:9px;background:var(--bg4);border:1px solid var(--border2);color:var(--text2);font-size:11px;font-weight:700;cursor:pointer}
 .cardio-done-btn{flex:1;padding:9px 11px;border-radius:9px;background:var(--orange-dim);border:1px solid var(--orange-border);color:var(--orange);font-size:12px;font-weight:800;cursor:pointer}
+.clean-day-btn{width:100%;padding:13px;border-radius:11px;background:var(--green-dim);border:1.5px solid var(--green-border);color:var(--green);font-size:14px;font-weight:800;cursor:pointer;margin:1rem 0}
+.clean-day-btn:disabled{opacity:.7;cursor:default}
 
 @keyframes runAcross{
   from{transform:translateX(110vw)}
@@ -589,7 +591,7 @@ tr[onclick]:active,.rl-row:active{
 .cal-today-btn{
   font-size:11px;font-weight:700;color:var(--orange);
   background:var(--orange-dim);border:1px solid var(--orange-border);
-  border-radius:999px;padding:3px 10px;cursor:pointer;
+  border-radius:999px;padding:3px 10px;cursor:pointer;white-space:nowrap;flex-shrink:0;
 }
 .cal-today-btn:active{opacity:.7}
 /* picker */
@@ -930,6 +932,7 @@ tr[onclick]:active,.rl-row:active{
 <div id="p-diet" class="panel">
   <div class="diet-section">
     <div id="diet-clean-days-stat" style="margin-bottom:1.2rem"></div>
+    <button class="clean-day-btn" onclick="markTodayCleanDay()">🥗 Mark Today as a Clean Day</button>
     <div id="diet-bodystats-nudge"></div>
     <div class="slabel" style="margin-top:0">Your Stats</div>
     <div class="diet-input-row">
@@ -1051,9 +1054,10 @@ tr[onclick]:active,.rl-row:active{
     <!-- Month navigation -->
     <div class="cal-month-nav">
       <button class="cal-nav-btn" onclick="calShift(-1)">‹</button>
-      <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px;flex:1;min-width:0">
+        <button class="cal-today-btn" id="cal-today-btn-left" onclick="calGoToday()" style="display:none">↩ Today</button>
         <button class="cal-month-label" id="cal-month-label" onclick="openCalPicker()" title="Pick month/year">July 2025 ▾</button>
-        <button class="cal-today-btn" id="cal-today-btn" onclick="calGoToday()" style="display:none">↩ Today</button>
+        <button class="cal-today-btn" id="cal-today-btn-right" onclick="calGoToday()" style="display:none">↩ Today</button>
       </div>
       <button class="cal-nav-btn" onclick="calShift(1)">›</button>
     </div>
@@ -1071,6 +1075,8 @@ tr[onclick]:active,.rl-row:active{
         <div class="cal-grid" id="cal-grid-next"></div>
       </div>
     </div>
+
+    <button class="clean-day-btn" id="cal-clean-day-btn" onclick="markTodayCleanDay()">🥗 Mark Today as a Clean Day</button>
 
     <!-- History / planned list -->
     <div class="slabel" style="margin-top:1.2rem">This month — training log</div>
@@ -1406,6 +1412,7 @@ tr[onclick]:active,.rl-row:active{
       <button class="clear-section-btn" onclick="askClearSection('exercises')">🗑 Clear Exercises (keep weights)</button>
       <button class="clear-section-btn" onclick="askClearSection('weights')">🗑 Clear All LT / SB / PB</button>
       <button class="clear-section-btn" onclick="askClearSection('sb')">🗑 Clear All SB only</button>
+      <button class="clear-section-btn" onclick="askClearSection('pb')">🗑 Clear All PB only</button>
       <button class="clear-section-btn" onclick="askClearSection('calendar')">🗑 Clear Calendar</button>
       <button class="clear-section-btn" onclick="askClearSection('bodystats')">🗑 Clear Body Stats</button>
       <button class="clear-section-btn" onclick="askClearSection('badges')">🗑 Clear All Badges</button>
@@ -1552,19 +1559,8 @@ tr[onclick]:active,.rl-row:active{
 
   <div id="profile-week-banner" style="margin-bottom:1.2rem"></div>
 
-  <div class="slabel" style="margin-top:0">🎖️ Rank</div>
+  <div class="slabel" style="margin-top:0">🎖️ Rank &amp; Achievements</div>
   <div id="profile-rank-row" style="margin-bottom:1.2rem"></div>
-
-  <div class="slabel" style="margin-top:0">🎖️ Achievements</div>
-  <div class="chart-card" style="margin-bottom:1.2rem">
-    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.6rem">
-      <div id="badge-progress-count" style="font-size:20px;font-weight:800;color:var(--orange)">0<span style="font-size:12px;color:var(--text3);font-weight:600"> / 0 unlocked</span></div>
-      <div id="badge-progress-pct" style="font-size:11px;color:var(--text2);font-weight:700"></div>
-    </div>
-    <div style="height:8px;border-radius:999px;background:var(--bg4);overflow:hidden">
-      <div id="badge-progress-bar" style="height:100%;background:linear-gradient(90deg,var(--orange),var(--orange2));border-radius:999px;width:0%;transition:width .4s ease"></div>
-    </div>
-  </div>
 
   <div id="badge-sections"></div>
 
@@ -3891,11 +3887,29 @@ function beep(freq,dur,vol){
 }
 
 // Keeps the AudioContext alive/unlocked. Safe to call repeatedly.
+let audioUnlocked=false;
+
+// On iOS/WebKit, calling ctx.resume() is NOT enough to genuinely unlock audio
+// output — even when ctx.state reads 'running', nothing is audible until a
+// sound node has actually been STARTED inside a real user gesture. That's why
+// the very first session after opening the app stayed silent while later
+// sessions (after backgrounding and returning, which triggered a resume path)
+// worked. Playing a one-frame silent buffer on the first tap performs the real
+// unlock; from then on scheduled beeps are audible.
 function unlockAudio(){
   const ctx=getAudioCtx();if(!ctx)return;
   if(ctx.state==='suspended'||ctx.state==='interrupted'){
     try{ctx.resume().catch(()=>{})}catch(e){}
   }
+  if(audioUnlocked)return;
+  try{
+    const buf=ctx.createBuffer(1,1,22050);
+    const src=ctx.createBufferSource();
+    src.buffer=buf;
+    src.connect(ctx.destination);
+    src.start(0);
+    audioUnlocked=true;
+  }catch(e){}
 }
 // iOS may require a real user gesture to resume audio. Returning to the app almost
 // always involves a tap somewhere, so unlock on any touch/click as a safety net.
@@ -4013,6 +4027,8 @@ function startTimer(sec,name,u,day,groupId,altIdx){
 
   const rb=document.getElementById('rest-btn-'+u);
   if(rb)rb.classList.add('active');
+  const rbTips=document.getElementById('rest-btn-tips-'+u);
+  if(rbTips)rbTips.classList.add('active');
 
   // highlight active exercise
   document.querySelectorAll('.ex-slide.timer-active').forEach(b=>b.classList.remove('timer-active'));
@@ -4075,6 +4091,8 @@ function cancelTimer(u){
   delete activeTimers[u];
   const rb=document.getElementById('rest-btn-'+u);
   if(rb)rb.classList.remove('active');
+  const rbTips=document.getElementById('rest-btn-tips-'+u);
+  if(rbTips)rbTips.classList.remove('active');
   // cancelling behaves the same as the timer finishing naturally — the next
   // roman numeral appears, with no "DONE" label, whether this run through
   // cancelTimer came from the ✕ button or from the natural-finish auto-cancel
@@ -4317,9 +4335,9 @@ function buildSessionSummary(day){
       lt,repsMin:repsRange.min,repsMax:repsRange.max,volMin,volMax
     });
 
-    if(w.sbDate===todayStr)newRecords.push({name:info.name,emoji:info.emoji,kind:'SB'});
-    if(w.pbDate===todayStr)newRecords.push({name:info.name,emoji:info.emoji,kind:'PB'});
-    if(w.increase===true)increased.push({name:info.name,emoji:info.emoji});
+    if(w.sbDate===todayStr)newRecords.push({name:info.name,emoji:info.emoji,type:info.type,typeBadge:info.typeBadge,kind:'SB'});
+    if(w.pbDate===todayStr)newRecords.push({name:info.name,emoji:info.emoji,type:info.type,typeBadge:info.typeBadge,kind:'PB'});
+    if(w.increase===true)increased.push({name:info.name,emoji:info.emoji,type:info.type,typeBadge:info.typeBadge});
   });
 
   return{day,items,totalMin,totalMax,newRecords,increased,exerciseCount:items.length};
@@ -4346,24 +4364,47 @@ function buildSessionSummaryHTML(day,s){
   const itemsHtml=s.items.length?`<div class="chart-card" style="padding:0;overflow:hidden;margin-bottom:.8rem">
     <table style="width:100%;border-collapse:collapse;font-size:11px">
       <tbody>
-        ${s.items.map(it=>`<tr style="border-top:1px solid var(--border)">
-          <td style="padding:6px 8px;text-align:center;font-size:13px;width:24px">${it.emoji}</td>
+        ${s.items.map(it=>{
+          // Whole Body pulls exercises from different source days, so the emoji
+          // (which day it came from) is the useful signal there. On a single-day
+          // session every exercise is already from THAT day, so the exercise's
+          // own type (compound/isolation/finisher/abs) is more informative.
+          const iconCell=day==='all'
+            ?`<td style="padding:6px 8px;text-align:center;font-size:13px;width:24px">${it.emoji}</td>`
+            :`<td style="padding:6px 8px;text-align:center;width:34px"><span class="type-badge type-${it.type}" style="font-size:8px;padding:2px 4px">${it.typeBadge}</span></td>`;
+          return`<tr style="border-top:1px solid var(--border)">
+          ${iconCell}
           <td style="padding:6px 8px;color:var(--text)">${it.name}</td>
           <td style="padding:6px 8px;text-align:right;color:var(--text2);white-space:nowrap">${it.lt!=null?it.lt+' kg':'—'}</td>
           <td style="padding:6px 8px;text-align:right;color:var(--text3);white-space:nowrap;font-size:10px">${it.volMin!=null?formatVolume(it.volMin)+'–'+formatVolume(it.volMax):'—'}</td>
-        </tr>`).join('')}
+        </tr>`;}).join('')}
       </tbody>
     </table>
   </div>`:'';
 
+  // no inline margins — used inside the fixed-width grid columns below so the
+  // badge/emoji sits centered in its own cell instead of pushing the following
+  // text around by a variable amount, which is what caused the misaligned
+  // columns in New Records / Marked to Increase before
+  const iconForGrid=r=>day==='all'
+    ?`<span style="font-size:15px">${r.emoji}</span>`
+    :`<span class="type-badge type-${r.type}" style="font-size:8px;padding:1px 4px;margin:0">${r.typeBadge}</span>`;
+
   const recordsHtml=s.newRecords.length?`<div class="chart-card" style="margin-bottom:.8rem">
-    <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:.4rem">🏆 New Records</div>
-    ${s.newRecords.map(r=>`<div style="font-size:12px;color:var(--text2);padding:2px 0">${r.emoji} <strong style="color:${r.kind==='PB'?'#22c55e':'#eab308'}">${r.kind}</strong> — ${r.name}</div>`).join('')}
+    <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:.5rem">🏆 New Records</div>
+    ${s.newRecords.map(r=>`<div style="display:grid;grid-template-columns:44px 26px 1fr;align-items:center;gap:8px;padding:3px 0;font-size:12px;color:var(--text2)">
+      <div>${iconForGrid(r)}</div>
+      <strong style="color:${r.kind==='PB'?'#22c55e':'#eab308'}">${r.kind}</strong>
+      <span>${r.name}</span>
+    </div>`).join('')}
   </div>`:'';
 
   const increasedHtml=s.increased.length?`<div class="chart-card" style="margin-bottom:.8rem">
-    <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:.4rem">⬆️ Marked to Increase Next Time</div>
-    ${s.increased.map(r=>`<div style="font-size:12px;color:var(--text2);padding:2px 0">${r.emoji} ${r.name}</div>`).join('')}
+    <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:.5rem">⬆️ Marked to Increase Next Time</div>
+    ${s.increased.map(r=>`<div style="display:grid;grid-template-columns:44px 1fr;align-items:center;gap:8px;padding:3px 0;font-size:12px;color:var(--text2)">
+      <div>${iconForGrid(r)}</div>
+      <span>${r.name}</span>
+    </div>`).join('')}
   </div>`:'';
 
   return{title,bodyHtml:volumeHtml+itemsHtml+recordsHtml+increasedHtml};
@@ -4410,6 +4451,10 @@ function openSessionSummary(day){
   document.getElementById('session-summary-title').textContent=title;
   document.getElementById('session-summary-body').innerHTML=bodyHtml;
   saveSessionSummarySnapshot(todayISO(),day,s);
+  // only NOW does this session's volume exist in sessionSummaries — checking
+  // badges before this point would miss any volume-threshold badge this
+  // exact session just qualified for
+  checkBadges(true);
   clearSessionLog(day);
   openOv('ov-session-summary');
 }
@@ -4425,13 +4470,18 @@ function doneSession(day){
   const pad=n=>String(n).padStart(2,'0');
   const key=`${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
   const entries=calLoad();
-  if(entries[key]?.status==='planned'){entries[key].status='done';}
-  else{entries[key]={type:calType,note:'',status:'done'};}
+  // whatever was planned (if anything) gets replaced by what actually happened —
+  // only the deload flag carries over, since a deload week doesn't depend on
+  // which specific training you ended up doing. Everything else (note, clean-day,
+  // cardio) starts fresh, since those are same-day facts tied to THIS session.
+  const existingDeload=entries[key]?.deload||false;
+  entries[key]={type:calType,note:'',status:'done',deload:existingDeload};
   calSave(entries);
 
   // confetti color matches training type
   launchConfetti(day);
-  checkBadges(true);// defer — the session summary opens first, badges follow after it closes
+  // badge check moved inside openSessionSummary — it must run AFTER the
+  // session's volume is saved there, not before
   openSessionSummary(day);
 }
 // ══════════════════════════════════════════
@@ -4615,13 +4665,13 @@ function buildCalMonthGridHTML(year,month,todayKey,entries){
       style=`background:${tc.bg};border:${borderStyle};color:${tc.color};font-weight:700;`;
       emojiHtml=tc.emoji?`<span style="font-size:8px;line-height:1;margin-bottom:1px;display:block">${tc.emoji}</span>`:'';
       if(entry.deload){
-        deloadDot=`<span style="position:absolute;top:0px;right:2px;font-size:7px;line-height:1">🔻</span>`;
+        deloadDot=`<span style="position:absolute;top:0px;right:1px;font-size:10px;line-height:1">🔻</span>`;
       }
       if(entry.noCheatMeal){
-        cheatMealMark=`<span style="position:absolute;top:0px;left:2px;font-size:7px;line-height:1">🥗</span>`;
+        cheatMealMark=`<span style="position:absolute;top:0px;left:1px;font-size:10px;line-height:1">🥗</span>`;
       }
       if(entry.cardio){
-        cardioMark=`<span style="position:absolute;bottom:0px;right:2px;font-size:7px;line-height:1">🏃</span>`;
+        cardioMark=`<span style="position:absolute;bottom:0px;right:1px;font-size:10px;line-height:1">🏃‍♂️</span>`;
       }
     }
 
@@ -4630,15 +4680,60 @@ function buildCalMonthGridHTML(year,month,todayKey,entries){
   return html;
 }
 
+// one-tap version of the "No Cheat Meal" checkbox flow — detects whether today
+// already has a real training logged and keeps it (just adding the clean flag),
+// or creates a diet-only clean day if nothing real is logged yet
+function markTodayCleanDay(){
+  const key=todayISO();
+  const entries=calLoad();
+  const existing=entries[key];
+  if(existing&&existing.type&&!existing.dietOnly){
+    existing.noCheatMeal=true;
+    existing.status='done';
+  } else {
+    entries[key]={type:null,note:existing?.note||'',status:'done',deload:false,noCheatMeal:true,dietOnly:true,cardio:existing?.cardio};
+  }
+  calSave(entries);
+  checkBadges();
+  if(document.getElementById('cal-grid'))renderCal();
+  renderDashCleanDays('diet-clean-days-stat');
+  renderCleanDaysChart('diet-clean-days-chart');
+  document.querySelectorAll('.clean-day-btn').forEach(btn=>{
+    const original=btn.dataset.originalText||btn.textContent;
+    btn.dataset.originalText=original;
+    btn.textContent='✓ Marked as Clean Day';
+    btn.disabled=true;
+    setTimeout(()=>{btn.textContent=original;btn.disabled=false;},1800);
+  });
+}
+
 function renderCal(){
   const today=new Date();
   const monthLabel=document.getElementById('cal-month-label');
   if(monthLabel)monthLabel.textContent=`${MONTH_NAMES[calMonth]} ${calYear} ▾`;
 
-  // show Today button only when not on current month
+  // Today button sits inline with the month label instead of stacked below it,
+  // so its row never changes height between months — only which SIDE it shows
+  // on changes: right (pointing forward) when viewing an earlier month, left
+  // (pointing back) when viewing a later one, exactly mirroring the direction
+  // you'd swipe to get back to today
   const isCurrentMonth=(calYear===today.getFullYear()&&calMonth===today.getMonth());
-  const todayBtn=document.getElementById('cal-today-btn');
-  if(todayBtn)todayBtn.style.display=isCurrentMonth?'none':'block';
+  const todayBtnLeft=document.getElementById('cal-today-btn-left');
+  const todayBtnRight=document.getElementById('cal-today-btn-right');
+  if(todayBtnLeft&&todayBtnRight){
+    if(isCurrentMonth){
+      todayBtnLeft.style.display='none';
+      todayBtnRight.style.display='none';
+    } else {
+      const viewedBeforeToday=(calYear<today.getFullYear())||(calYear===today.getFullYear()&&calMonth<today.getMonth());
+      todayBtnRight.style.display=viewedBeforeToday?'block':'none';
+      todayBtnLeft.style.display=viewedBeforeToday?'none':'block';
+    }
+  }
+  // "Mark Today as a Clean Day" only makes sense while looking at the actual
+  // current month — browsing to a past/future month hides it
+  const cleanDayBtn=document.getElementById('cal-clean-day-btn');
+  if(cleanDayBtn)cleanDayBtn.style.display=isCurrentMonth?'block':'none';
   const entries=calLoad();
   const todayKey=calKey(today.getFullYear(),today.getMonth(),today.getDate());
 
@@ -4817,7 +4912,13 @@ function calAttachSwipeHandlers(){
       if(el.dataset.hasDetails==='1'){
         const key=el.dataset.key;
         const slot=document.getElementById('cal-details-'+key);
-        if(slot)slot.classList.toggle('open');
+        if(!slot)return;
+        const willOpen=!slot.classList.contains('open');
+        // only one details panel can be expanded at a time — close any others
+        document.querySelectorAll('.cal-details-slot.open').forEach(other=>{
+          if(other!==slot)other.classList.remove('open');
+        });
+        slot.classList.toggle('open',willOpen);
       }
     });
   });
@@ -4920,12 +5021,11 @@ function calFormBodyHTML(key,isPlanned,prefNote){
   // editing an existing real training entry — converting it into a "no training"
   // day via this specific checkbox doesn't make sense, so it's disabled
   const ncmOnlyDisabled=calEditingRealTraining?' cal-grayed':'';
-  return`
-    <div class="type-grid${grayed}" id="cal-type-grid">${typeGrid}</div>
-    <div class="cal-deload-row${calPickedDeload?' checked':''}${grayed}" id="cal-deload-row" onclick="calToggleDeload()">
-      <div class="cal-deload-checkbox">✓</div>
-      <div class="cal-deload-label">🔻 Deload week</div>
-    </div>
+
+  // planning a future session only covers type, deload and a note — clean-eating
+  // and cardio are same-day facts you can't know ahead of time, so they only
+  // show up once you're actually logging a session that happened
+  const cheatMealSection=isPlanned?'':`
     <div class="cal-cheatmeal-grid">
       <div class="cal-cheatmeal-row${calPickedNoCheatMealTraining?' checked':''}" id="cal-ncm-training-row" onclick="calToggleNoCheatMealTraining()">
         <div class="cal-cheatmeal-checkbox">✓</div>
@@ -4937,8 +5037,17 @@ function calFormBodyHTML(key,isPlanned,prefNote){
         <div class="cal-cheatmeal-emoji">🥗</div>
         <div class="cal-cheatmeal-label">No Cheat Meal</div>
       </div>
+    </div>`;
+  const cardioSection=isPlanned?'':`<div id="cal-cardio-section" style="margin-bottom:1rem"></div>`;
+
+  return`
+    <div class="type-grid${grayed}" id="cal-type-grid">${typeGrid}</div>
+    <div class="cal-deload-row${calPickedDeload?' checked':''}${grayed}" id="cal-deload-row" onclick="calToggleDeload()">
+      <div class="cal-deload-checkbox">✓</div>
+      <div class="cal-deload-label">🔻 Deload week</div>
     </div>
-    <div id="cal-cardio-section" style="margin-bottom:1rem"></div>
+    ${cheatMealSection}
+    ${cardioSection}
     <textarea class="cal-note-input" id="cal-note-input" rows="2" placeholder="Short note (optional)">${prefNote||''}</textarea>
     <div class="sheet-btns">
       <button class="btn-orange" onclick="calSaveEntry('${key}','${isPlanned?'planned':'done'}')">${calPickedNoCheatMealOnly?'Log Clean Day':actionLabel}</button>
@@ -5067,6 +5176,7 @@ function calMarkDone(key){
   closeOv('ov-cal');
   renderCal();
   launchConfetti();
+  checkBadges();
 }
 
 let calDelKey=null;
@@ -5331,6 +5441,38 @@ function incrementTotalRestsStarted(){
 }
 function getTotalRestsStarted(){return loadData().totalRestsStarted||0}
 
+// how many DONE sessions of a specific training type have ever been logged
+function getSessionCountByType(type){
+  return Object.values(calLoad()).filter(e=>e.status==='done'&&!e.dietOnly&&e.type===type).length;
+}
+
+// the highest single-session estimated volume ever achieved, pulled from the
+// saved session-summary snapshots (uses the upper end of that session's
+// achieved rep bracket, same number shown on the summary itself)
+function getMaxSessionVolume(){
+  const summaries=loadData().sessionSummaries||{};
+  let max=0;
+  Object.values(summaries).forEach(snap=>{
+    if(snap&&snap.s&&snap.s.totalMax>max)max=snap.s.totalMax;
+  });
+  return max;
+}
+
+// how many DISTINCT weeks (not necessarily consecutive) have ever had at
+// least n done sessions — different from computeLongestWeekStreak, which
+// only counts consecutive runs
+function countWeeksWithAtLeast(n){
+  const entries=calLoad();
+  const byWeek={};
+  Object.keys(entries).forEach(k=>{
+    const e=entries[k];
+    if(e.status!=='done'||e.dietOnly)return;
+    const wk=weekKeyOf(new Date(k+'T12:00:00'));
+    byWeek[wk]=(byWeek[wk]||0)+1;
+  });
+  return Object.values(byWeek).filter(c=>c>=n).length;
+}
+
 // shared calculation helpers
 // a diet-only day (🥗 No Cheat Meal without training) must never count as a
 // training session in any statistic below — it's status:'done' so it wouldn't be
@@ -5548,6 +5690,21 @@ const BADGES=[
   {id:'hot_streak',cat:'Training Consistency',color:'orange',emoji:'🔥',name:'Hot Streak',desc:'8 weeks in a row with 3+ sessions.',calc:()=>({current:computeLongestWeekStreak(3),target:8})},
   {id:'unstoppable',cat:'Training Consistency',color:'orange',emoji:'🚀',name:'Unstoppable',desc:'20 weeks in a row with 3+ sessions.',calc:()=>({current:computeLongestWeekStreak(3),target:20})},
 
+  {id:'legs_1',cat:'Training Consistency',color:'orange',emoji:'🦵',name:'Leg Day',desc:'Log your first Legs session.',calc:()=>({current:getSessionCountByType('legs'),target:1})},
+  {id:'legs_10',cat:'Training Consistency',color:'orange',emoji:'🦵',name:'Leg Day Regular',desc:'Log 10 Legs sessions.',calc:()=>({current:getSessionCountByType('legs'),target:10})},
+  {id:'legs_50',cat:'Training Consistency',color:'orange',emoji:'🦵',name:'Never Skip Leg Day',desc:'Log 50 Legs sessions.',calc:()=>({current:getSessionCountByType('legs'),target:50})},
+
+  {id:'streak2_first',cat:'Training Consistency',color:'orange',emoji:'✌️',name:'Building Momentum',desc:'Your first week with a 2+ session streak.',calc:()=>({current:computeLongestWeekStreak(2),target:1})},
+  {id:'streak2_10',cat:'Training Consistency',color:'orange',emoji:'✌️',name:'Steady Pace',desc:'10 weeks in a row with 2+ sessions.',calc:()=>({current:computeLongestWeekStreak(2),target:10})},
+  {id:'streak2_25',cat:'Training Consistency',color:'orange',emoji:'✌️',name:'Long Haul',desc:'25 weeks in a row with 2+ sessions.',calc:()=>({current:computeLongestWeekStreak(2),target:25})},
+  {id:'streak2_50',cat:'Training Consistency',color:'orange',emoji:'✌️',name:'Iron Will',desc:'50 weeks in a row with 2+ sessions.',calc:()=>({current:computeLongestWeekStreak(2),target:50})},
+  {id:'streak3_first',cat:'Training Consistency',color:'orange',emoji:'🤟',name:'Real Commitment',desc:'Your first week with a 3+ session streak.',calc:()=>({current:computeLongestWeekStreak(3),target:1})},
+
+  {id:'week4_first',cat:'Training Consistency',color:'orange',emoji:'📅',name:'Big Week',desc:'Your first week with 4 sessions.',calc:()=>({current:countWeeksWithAtLeast(4),target:1})},
+  {id:'week5_first',cat:'Training Consistency',color:'orange',emoji:'📅',name:'Max Effort Week',desc:'Your first week with 5 sessions.',calc:()=>({current:countWeeksWithAtLeast(5),target:1})},
+  {id:'week4_5',cat:'Training Consistency',color:'orange',emoji:'🗓️',name:'High Volume Weeks',desc:'5 different weeks with 4+ sessions.',calc:()=>({current:countWeeksWithAtLeast(4),target:5})},
+  {id:'week4_20',cat:'Training Consistency',color:'orange',emoji:'🗓️',name:'Relentless Weeks',desc:'20 different weeks with 4+ sessions.',calc:()=>({current:countWeeksWithAtLeast(4),target:20})},
+
   {id:'planner',cat:'Planning',color:'purple',emoji:'📝',name:'Planner',desc:'Plan 10 sessions in total, ever.',calc:()=>({current:getTotalPlannedCount(),target:10})},
   {id:'master_planner',cat:'Planning',color:'purple',emoji:'🗂️',name:'Master Planner',desc:'Plan 25 sessions in total, ever.',calc:()=>({current:getTotalPlannedCount(),target:25})},
   {id:'organizer',cat:'Planning',color:'purple',emoji:'📋',name:'Organizer',desc:'Plan 50 sessions in total, ever.',calc:()=>({current:getTotalPlannedCount(),target:50})},
@@ -5564,6 +5721,9 @@ const BADGES=[
   {id:'double_bodyweight',cat:'Strength Milestones',color:'green',emoji:'🔗',name:'Double Bodyweight',desc:'Deadlift LT reaches 2× your logged bodyweight.',calc:()=>{const bw=getLatestBodyStatsEntry()?.weight,w=weights['dead-0'];return{current:(bw!=null&&w&&w.lt!=null&&w.lt>=bw*2)?1:0,target:1};}},
   {id:'double_trap_bodyweight',cat:'Strength Milestones',color:'green',emoji:'⛓️',name:'Double Trap Bodyweight',desc:'Trap Bar Deadlift LT reaches 2× your logged bodyweight.',calc:()=>{const bw=getLatestBodyStatsEntry()?.weight,w=weights['dead-2'];return{current:(bw!=null&&w&&w.lt!=null&&w.lt>=bw*2)?1:0,target:1};}},
   {id:'leg_press_200',cat:'Strength Milestones',color:'green',emoji:'🦿',name:'Leg Day Legend',desc:'Leg Press LT reaches 200kg.',calc:()=>{const w=weights['lpress-0'];return{current:(w&&w.lt!=null)?Math.min(w.lt,200):0,target:200};}},
+  {id:'session_vol_2000',cat:'Strength Milestones',color:'green',emoji:'📦',name:'Volume Mover',desc:"A single session's estimated volume reaches 2,000kg.",calc:()=>({current:Math.min(getMaxSessionVolume(),2000),target:2000})},
+  {id:'session_vol_2500',cat:'Strength Milestones',color:'green',emoji:'🏗️',name:'Heavy Hauler',desc:"A single session's estimated volume reaches 2,500kg.",calc:()=>({current:Math.min(getMaxSessionVolume(),2500),target:2500})},
+  {id:'session_vol_3000',cat:'Strength Milestones',color:'green',emoji:'🗿',name:'Titan Session',desc:"A single session's estimated volume reaches 3,000kg.",calc:()=>({current:Math.min(getMaxSessionVolume(),3000),target:3000})},
 
   {id:'rest_10',cat:'Perfect Rests',color:'blue',emoji:'⏱️',name:'Rest Rookie',desc:'Start your rest timer 10 times.',calc:()=>({current:getTotalRestsStarted(),target:10})},
   {id:'rest_100',cat:'Perfect Rests',color:'blue',emoji:'⏲️',name:'Rest Regular',desc:'Start your rest timer 100 times.',calc:()=>({current:getTotalRestsStarted(),target:100})},
@@ -5592,28 +5752,28 @@ const BADGES=[
   {id:'bulk_lean',cat:'Body Tracking',color:'blue',emoji:'🔷',name:'Bulk Lean',desc:'Reach 77kg at ≤14% body fat.',calc:()=>({current:hasBodyStatsMilestone(77,14)?1:0,target:1})},
   {id:'athletic',cat:'Body Tracking',color:'blue',emoji:'🏅',name:'Athletic',desc:'Reach 75kg at ≤10% body fat.',calc:()=>({current:hasBodyStatsMilestone(75,10)?1:0,target:1})},
 
-  {id:'make_it_yours',cat:'Personalization',color:'orange',emoji:'🛠️',name:'Make It Yours',desc:'Edit or add your first custom exercise.',calc:()=>({current:getCustomizedExerciseCount(),target:1})},
-  {id:'custom_5',cat:'Personalization',color:'orange',emoji:'🔧',name:'Getting Handy',desc:'Edit or add 5 custom exercises.',calc:()=>({current:getCustomizedExerciseCount(),target:5})},
-  {id:'custom_10',cat:'Personalization',color:'orange',emoji:'⚙️',name:'Tinkerer',desc:'Edit or add 10 custom exercises.',calc:()=>({current:getCustomizedExerciseCount(),target:10})},
-  {id:'custom_25',cat:'Personalization',color:'orange',emoji:'🧰',name:'Program Architect',desc:'Edit or add 25 custom exercises.',calc:()=>({current:getCustomizedExerciseCount(),target:25})},
-  {id:'custom_50',cat:'Personalization',color:'orange',emoji:'🏗️',name:'Master Builder',desc:'Edit or add 50 custom exercises.',calc:()=>({current:getCustomizedExerciseCount(),target:50})},
-  {id:'backed_up',cat:'Personalization',color:'orange',emoji:'💾',name:'Backed Up',desc:'Export your data for the first time.',calc:()=>({current:getDataExportedCount(),target:1})},
-  {id:'backed_up_10',cat:'Personalization',color:'orange',emoji:'🗄️',name:'Backup Habit',desc:'Export your data 10 times.',calc:()=>({current:getDataExportedCount(),target:10})},
-  {id:'this_is_you',cat:'Personalization',color:'orange',emoji:'🖼️',name:'This Is You',desc:'Add a photo as your avatar for the first time.',calc:()=>({current:getProfile().avatarType==='photo'?1:0,target:1})},
-  {id:'my_name_is',cat:'Personalization',color:'orange',emoji:'✍️',name:'My Name Is',desc:'Set your nickname for the first time.',calc:()=>({current:(getProfile().nickname||'').trim()?1:0,target:1})},
-  {id:'my_age_is',cat:'Personalization',color:'orange',emoji:'🎂',name:'Age Is Just a Number',desc:'Enter your age on your Profile for the first time.',calc:()=>({current:(getProfile().age||'').toString().trim()?1:0,target:1})},
-  {id:'my_height_is',cat:'Personalization',color:'orange',emoji:'📐',name:'Standing Tall',desc:'Enter your height on your Profile for the first time.',calc:()=>({current:(getProfile().height||'').toString().trim()?1:0,target:1})},
-  {id:'accent_changed',cat:'Personalization',color:'orange',emoji:'🎨',name:'Your True Colors',desc:'Change your Accent Color for the first time.',calc:()=>{const c=getProfile().accentColor;return{current:(c&&c!=='orange')?1:0,target:1};}},
+  {id:'make_it_yours',cat:'Personalization',color:'accent',emoji:'🛠️',name:'Make It Yours',desc:'Edit or add your first custom exercise.',calc:()=>({current:getCustomizedExerciseCount(),target:1})},
+  {id:'custom_5',cat:'Personalization',color:'accent',emoji:'🔧',name:'Getting Handy',desc:'Edit or add 5 custom exercises.',calc:()=>({current:getCustomizedExerciseCount(),target:5})},
+  {id:'custom_10',cat:'Personalization',color:'accent',emoji:'⚙️',name:'Tinkerer',desc:'Edit or add 10 custom exercises.',calc:()=>({current:getCustomizedExerciseCount(),target:10})},
+  {id:'custom_25',cat:'Personalization',color:'accent',emoji:'🧰',name:'Program Architect',desc:'Edit or add 25 custom exercises.',calc:()=>({current:getCustomizedExerciseCount(),target:25})},
+  {id:'custom_50',cat:'Personalization',color:'accent',emoji:'🏗️',name:'Master Builder',desc:'Edit or add 50 custom exercises.',calc:()=>({current:getCustomizedExerciseCount(),target:50})},
+  {id:'backed_up',cat:'Personalization',color:'accent',emoji:'💾',name:'Backed Up',desc:'Export your data for the first time.',calc:()=>({current:getDataExportedCount(),target:1})},
+  {id:'backed_up_10',cat:'Personalization',color:'accent',emoji:'🗄️',name:'Backup Habit',desc:'Export your data 10 times.',calc:()=>({current:getDataExportedCount(),target:10})},
+  {id:'this_is_you',cat:'Personalization',color:'accent',emoji:'🖼️',name:'This Is You',desc:'Add a photo as your avatar for the first time.',calc:()=>({current:getProfile().avatarType==='photo'?1:0,target:1})},
+  {id:'my_name_is',cat:'Personalization',color:'accent',emoji:'✍️',name:'My Name Is',desc:'Set your nickname for the first time.',calc:()=>({current:(getProfile().nickname||'').trim()?1:0,target:1})},
+  {id:'my_age_is',cat:'Personalization',color:'accent',emoji:'🎂',name:'Age Is Just a Number',desc:'Enter your age on your Profile for the first time.',calc:()=>({current:(getProfile().age||'').toString().trim()?1:0,target:1})},
+  {id:'my_height_is',cat:'Personalization',color:'accent',emoji:'📐',name:'Standing Tall',desc:'Enter your height on your Profile for the first time.',calc:()=>({current:(getProfile().height||'').toString().trim()?1:0,target:1})},
+  {id:'accent_changed',cat:'Personalization',color:'accent',emoji:'🎨',name:'Your True Colors',desc:'Change your Accent Color for the first time.',calc:()=>{const c=getProfile().accentColor;return{current:(c&&c!=='orange')?1:0,target:1};}},
 
-  {id:'yt_1',cat:'Personal Trainer',color:'orange',emoji:'🎬',name:'Show Me How',desc:'Add a YouTube link to an exercise for the first time.',calc:()=>({current:loadData().youtubeLinkCount||0,target:1})},
-  {id:'yt_10',cat:'Personal Trainer',color:'orange',emoji:'📹',name:'Video Library',desc:'Add 10 YouTube links.',calc:()=>({current:loadData().youtubeLinkCount||0,target:10})},
-  {id:'yt_25',cat:'Personal Trainer',color:'orange',emoji:'🎥',name:'Film Buff',desc:'Add 25 YouTube links.',calc:()=>({current:loadData().youtubeLinkCount||0,target:25})},
-  {id:'yt_50',cat:'Personal Trainer',color:'orange',emoji:'📽️',name:'Director Mode',desc:'Add 50 YouTube links.',calc:()=>({current:loadData().youtubeLinkCount||0,target:50})},
-  {id:'yt_100',cat:'Personal Trainer',color:'orange',emoji:'🏆',name:'Full Filmography',desc:'Add 100 YouTube links.',calc:()=>({current:loadData().youtubeLinkCount||0,target:100})},
-  {id:'instr_1',cat:'Personal Trainer',color:'orange',emoji:'📝',name:'First Lesson',desc:'Add a custom instruction to an exercise for the first time.',calc:()=>({current:loadData().customInstructionCount||0,target:1})},
-  {id:'instr_10',cat:'Personal Trainer',color:'orange',emoji:'📋',name:'Coaching Notes',desc:'Add 10 custom instructions.',calc:()=>({current:loadData().customInstructionCount||0,target:10})},
-  {id:'instr_25',cat:'Personal Trainer',color:'orange',emoji:'📖',name:'Playbook',desc:'Add 25 custom instructions.',calc:()=>({current:loadData().customInstructionCount||0,target:25})},
-  {id:'instr_50',cat:'Personal Trainer',color:'orange',emoji:'🎓',name:'Head Coach',desc:'Add 50 custom instructions.',calc:()=>({current:loadData().customInstructionCount||0,target:50})},
+  {id:'yt_1',cat:'Personal Trainer',color:'accent',emoji:'🎬',name:'Show Me How',desc:'Add a YouTube link to an exercise for the first time.',calc:()=>({current:loadData().youtubeLinkCount||0,target:1})},
+  {id:'yt_10',cat:'Personal Trainer',color:'accent',emoji:'📹',name:'Video Library',desc:'Add 10 YouTube links.',calc:()=>({current:loadData().youtubeLinkCount||0,target:10})},
+  {id:'yt_25',cat:'Personal Trainer',color:'accent',emoji:'🎥',name:'Film Buff',desc:'Add 25 YouTube links.',calc:()=>({current:loadData().youtubeLinkCount||0,target:25})},
+  {id:'yt_50',cat:'Personal Trainer',color:'accent',emoji:'📽️',name:'Director Mode',desc:'Add 50 YouTube links.',calc:()=>({current:loadData().youtubeLinkCount||0,target:50})},
+  {id:'yt_100',cat:'Personal Trainer',color:'accent',emoji:'🏆',name:'Full Filmography',desc:'Add 100 YouTube links.',calc:()=>({current:loadData().youtubeLinkCount||0,target:100})},
+  {id:'instr_1',cat:'Personal Trainer',color:'accent',emoji:'📝',name:'First Lesson',desc:'Add a custom instruction to an exercise for the first time.',calc:()=>({current:loadData().customInstructionCount||0,target:1})},
+  {id:'instr_10',cat:'Personal Trainer',color:'accent',emoji:'📋',name:'Coaching Notes',desc:'Add 10 custom instructions.',calc:()=>({current:loadData().customInstructionCount||0,target:10})},
+  {id:'instr_25',cat:'Personal Trainer',color:'accent',emoji:'📖',name:'Playbook',desc:'Add 25 custom instructions.',calc:()=>({current:loadData().customInstructionCount||0,target:25})},
+  {id:'instr_50',cat:'Personal Trainer',color:'accent',emoji:'🎓',name:'Head Coach',desc:'Add 50 custom instructions.',calc:()=>({current:loadData().customInstructionCount||0,target:50})},
 
   {id:'clean_3days',cat:'Clean Eating',color:'green',emoji:'🥗',name:'Clean Start',desc:'3 consecutive days without a cheat meal.',calc:()=>({current:computeLongestCleanStreak(),target:3})},
   {id:'clean_week',cat:'Clean Eating',color:'green',emoji:'📆',name:'Clean Week',desc:'7 consecutive days without a cheat meal.',calc:()=>({current:computeLongestCleanStreak(),target:7})},
@@ -5679,20 +5839,66 @@ function checkTrophies(unlockedCount){
   applyRankRing();
 }
 
+// Maps a badge count onto the bar's 0–100% scale. The mapping is deliberately
+// PIECEWISE rather than linear: each trophy threshold must land exactly on its
+// marker (10 badges → 25%, 25 → 50%, 50 → 75%, all → 100%), so the segments
+// between markers each represent a different number of badges but the same
+// visual width. A plain linear scale would put the trophies at odd positions.
+function badgeCountToBarPct(count){
+  const ms=getTrophyMilestones();
+  const stops=[0,...ms.map(m=>m.threshold)];// [0, 10, 25, 50, ALL]
+  for(let i=1;i<stops.length;i++){
+    if(count<=stops[i]){
+      const segStart=stops[i-1],segEnd=stops[i];
+      const within=segEnd>segStart?(count-segStart)/(segEnd-segStart):1;
+      return((i-1)*25)+(within*25);
+    }
+  }
+  return 100;
+}
+
 function renderRankSection(){
   const container=document.getElementById('profile-rank-row');
   if(!container)return;
   const unlockedCount=Object.keys(getUnlockedBadges()).length;
+  const total=BADGES.length;
   const seen=getTrophiesSeen();
-  const cells=getTrophyMilestones().map(tr=>{
+  const ms=getTrophyMilestones();
+  const barPct=badgeCountToBarPct(unlockedCount);
+
+  // each 25% segment is tinted for the rank it leads up to; the filled portion
+  // is clipped to the current progress so colours reveal as ranks are reached
+  const gradient=`linear-gradient(90deg,
+    #ffffff 0%, #ffffff 25%,
+    #cd7f32 25%, #cd7f32 50%,
+    #c0c0c0 50%, #c0c0c0 75%,
+    #ffd700 75%, #ffd700 100%)`;
+
+  // trophies sit ON the bar at their marker positions, centred over the point
+  const markers=ms.map((tr,i)=>{
+    const pos=(i+1)*25;
     const earned=!!seen[tr.id];
-    const style=earned?'opacity:1;filter:none':'opacity:.35;filter:grayscale(1)';
-    return`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
-      <div style="font-size:32px;line-height:1;${style}">${tr.emoji}</div>
-      <div style="font-size:8.5px;font-weight:700;color:${earned?'var(--text2)':'var(--text3)'};text-align:center;white-space:nowrap">${tr.shortName} (${tr.threshold===BADGES.length?'ALL':tr.threshold})</div>
+    const style=earned?'opacity:1;filter:none':'opacity:.3;filter:grayscale(1)';
+    return`<div style="position:absolute;left:${pos}%;top:0;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;width:64px">
+      <div style="font-size:26px;line-height:1;${style}">${tr.emoji}</div>
+      <div style="font-size:8px;font-weight:700;color:${earned?'var(--text2)':'var(--text3)'};text-align:center;line-height:1.3;margin-top:2px;white-space:nowrap">${tr.shortName}<br>${tr.threshold}</div>
     </div>`;
   }).join('');
-  container.innerHTML=`<div class="chart-card" style="display:flex;gap:4px">${cells}</div>`;
+
+  container.innerHTML=`<div class="chart-card">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.7rem">
+      <div style="font-size:20px;font-weight:800;color:var(--orange)">${unlockedCount}<span style="font-size:12px;color:var(--text3);font-weight:600"> / ${total} unlocked</span></div>
+      <div style="font-size:11px;color:var(--text2);font-weight:700">${total?Math.round(unlockedCount/total*100):0}%</div>
+    </div>
+    <div style="position:relative;padding-right:32px">
+      <div style="position:relative;height:10px;border-radius:999px;background:var(--bg4);overflow:hidden">
+        <div style="position:absolute;top:0;left:0;height:100%;width:${barPct.toFixed(2)}%;overflow:hidden;border-radius:999px;transition:width .4s ease">
+          <div style="height:100%;width:${barPct>0?(10000/barPct).toFixed(2):100}%;background:${gradient}"></div>
+        </div>
+      </div>
+      <div style="position:relative;height:46px;margin-top:5px">${markers}</div>
+    </div>
+  </div>`;
 }
 
 // multiple square particles burst outward from screen-center in every
@@ -5747,7 +5953,22 @@ function checkBadges(defer){
   return changed;
 }
 
+// returns just the badge's base color — used by the locked-state progress ring,
+// which needs a plain color value rather than the full gradient/glow style
+function badgeBaseColor(color){
+  if(color==='accent')return'var(--orange)';
+  const map={orange:'#ff6b00',blue:'#3b82f6',purple:'#a855f7',yellow:'#eab308',green:'#22c55e',red:'#ef4444'};
+  return map[color]||map.orange;
+}
+
 function badgeCircleStyle(color){
+  // 'accent' follows the user's chosen Accent Color live (via CSS variables),
+  // used only for Personalization and Personal Trainer — every other category
+  // (including 'orange' itself, e.g. Training Consistency) stays a fixed hue
+  // so picking a new accent never blends two unrelated categories together
+  if(color==='accent'){
+    return`background:radial-gradient(circle at 35% 30%, var(--orange2), var(--orange) 70%);box-shadow:0 0 0 1.5px var(--orange), 0 4px 14px -2px var(--orange)`;
+  }
   // each category gets a lighter highlight tone + its base color, so the gradient
   // actually reads as a glow instead of a flat fill — plus a soft blurred shadow
   // on top of the thin ring, matching the original mockup design
@@ -5792,11 +6013,25 @@ function renderBadgeSections(){
       const isUnlocked=!!unlocked[b.id];
       if(isUnlocked)unlockedCount++;
       const{current,target}=b.calc();
-      const circleStyle=isUnlocked
-        ?badgeCircleStyle(b.color)
-        :'background:var(--bg3);border:1.5px dashed var(--border2);filter:grayscale(1);opacity:.5';
+
+      let circleHtml;
+      if(isUnlocked){
+        circleHtml=`<div style="width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:6px;${badgeCircleStyle(b.color)}">${b.emoji}</div>`;
+      } else {
+        // locked: a ring in the badge's own color, filled clockwise to match
+        // how far along the badge's requirement you actually are. Built as a
+        // conic-gradient ring (outer div) with the grey badge face punched out
+        // by an inset inner div, so the ring reads as a border not a pie.
+        const pct=target>0?Math.max(0,Math.min(1,current/target)):0;
+        const deg=(pct*360).toFixed(1);
+        const col=badgeBaseColor(b.color);
+        circleHtml=`<div style="width:60px;height:60px;border-radius:50%;margin-bottom:6px;padding:3px;box-sizing:border-box;background:conic-gradient(${col} ${deg}deg, var(--border2) ${deg}deg)">
+          <div style="width:100%;height:100%;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:24px;filter:grayscale(1);opacity:.55">${b.emoji}</div>
+        </div>`;
+      }
+
       return`<div onclick="openBadgeDetail('${b.id}')" style="display:flex;flex-direction:column;align-items:center;text-align:center;cursor:pointer">
-        <div style="width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:6px;${circleStyle}">${b.emoji}</div>
+        ${circleHtml}
         <div style="font-size:9.5px;font-weight:${isUnlocked?700:600};color:${isUnlocked?'var(--text)':'var(--text3)'};line-height:1.25">${b.name}</div>
         ${isUnlocked?'':`<div style="font-size:8px;color:var(--text3);font-weight:700;margin-top:1px">${Math.min(current,target)}/${target}</div>`}
       </div>`;
@@ -5806,14 +6041,9 @@ function renderBadgeSections(){
 
   container.innerHTML=html;
 
-  const total=BADGES.length;
-  const pct=total?Math.round(unlockedCount/total*100):0;
-  const countEl=document.getElementById('badge-progress-count');
-  const pctEl=document.getElementById('badge-progress-pct');
-  const barEl=document.getElementById('badge-progress-bar');
-  if(countEl)countEl.innerHTML=`${unlockedCount}<span style="font-size:12px;color:var(--text3);font-weight:600"> / ${total} unlocked</span>`;
-  if(pctEl)pctEl.textContent=pct+'%';
-  if(barEl)barEl.style.width=pct+'%';
+  // the badge count/percentage now lives in the merged Rank & Achievements
+  // card, so re-render that instead of updating the old standalone bar
+  renderRankSection();
 }
 
 function openBadgeDetail(id){
@@ -5822,9 +6052,18 @@ function openBadgeDetail(id){
   const unlocked=getUnlockedBadges();
   const isUnlocked=!!unlocked[id];
   const circle=document.getElementById('badge-detail-circle');
-  circle.style.cssText='width:88px;height:88px;margin:0 auto 12px;font-size:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;'+
-    (isUnlocked?badgeCircleStyle(b.color):'background:var(--bg3);border:1.5px dashed var(--border2);filter:grayscale(1);opacity:.5');
-  circle.textContent=b.emoji;
+  if(isUnlocked){
+    circle.style.cssText='width:88px;height:88px;margin:0 auto 12px;font-size:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;'+badgeCircleStyle(b.color);
+    circle.innerHTML=b.emoji;
+  } else {
+    // same conic-gradient progress ring as the grid tiles, scaled up
+    const{current:cur,target:tgt}=b.calc();
+    const pct=tgt>0?Math.max(0,Math.min(1,cur/tgt)):0;
+    const deg=(pct*360).toFixed(1);
+    const col=badgeBaseColor(b.color);
+    circle.style.cssText=`width:88px;height:88px;margin:0 auto 12px;border-radius:50%;padding:4px;box-sizing:border-box;background:conic-gradient(${col} ${deg}deg, var(--border2) ${deg}deg)`;
+    circle.innerHTML=`<div style="width:100%;height:100%;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:38px;filter:grayscale(1);opacity:.55">${b.emoji}</div>`;
+  }
   document.getElementById('badge-detail-title').textContent=b.name;
   document.getElementById('badge-detail-desc').textContent=b.desc;
   const statusEl=document.getElementById('badge-detail-status');
@@ -6534,10 +6773,10 @@ function renderTrainingPie(containerId,animate){
     const arcEl=document.getElementById(arcId);
     const pctEl=document.getElementById(pctId);
     const start=performance.now();
-    const duration=800;
+    const duration=2400;// 3x slower than the original 800ms
     function tick(now){
       const t=Math.min(1,(now-start)/duration);
-      const eased=1-Math.pow(1-t,3);
+      const eased=1-Math.pow(1-t,4);// ease-out quartic — stronger slowdown near the finish
       if(arcEl)arcEl.setAttribute('stroke-dasharray',`${(trainedLen*eased).toFixed(1)} ${C.toFixed(1)}`);
       if(pctEl)pctEl.textContent=Math.round(pct*eased)+'%';
       if(t<1)requestAnimationFrame(tick);
@@ -7039,7 +7278,7 @@ function animateCountUp(elId,target,duration){
   const start=performance.now();
   function tick(now){
     const t=Math.min(1,(now-start)/duration);
-    const eased=1-Math.pow(1-t,3);// ease-out cubic — fast start, gentle finish
+    const eased=1-Math.pow(1-t,4);// ease-out quartic — fast start, pronounced slowdown at the end
     el.textContent=Math.round(target*eased);
     if(t<1)requestAnimationFrame(tick);
     else el.textContent=target;
@@ -7225,8 +7464,8 @@ function renderStreaks(animate){
       </div>
     </div>`;
   if(animate){
-    animateCountUp('dash-streak3-num',streak3,700);
-    animateCountUp('dash-streak2-num',streak2,700);
+    animateCountUp('dash-streak3-num',streak3,2100);
+    animateCountUp('dash-streak2-num',streak2,2100);
   }
 }
 
@@ -7241,7 +7480,7 @@ function renderDashTrainingDays(animate){
       <div style="font-size:11px;color:var(--text3);margin-top:4px;font-weight:600;letter-spacing:.03em;text-transform:uppercase">Total Training Days Logged</div>
     </div>
     <div id="dash-pie-inner"></div>`;
-  if(animate)animateCountUp('dash-total-days-num',total,700);
+  if(animate)animateCountUp('dash-total-days-num',total,2100);
   renderTrainingPie('dash-pie-inner',animate);
 }
 
@@ -8182,6 +8421,7 @@ const CLEAR_LABELS={
   exercises:'all exercises (custom changes — resets to defaults)',
   weights:'all LT, SB and PB from every exercise',
   sb:'all Season Bests (SB) from every exercise',
+  pb:'all Personal Bests (PB) from every exercise',
   calendar:'all calendar entries',
   bodystats:'all body stats and progress photos',
   badges:'every unlocked badge, resetting them all to locked. Note: your training history, weights and records aren\'t touched, so any badge whose condition is still met may unlock again the next time it\'s checked'
@@ -8201,6 +8441,9 @@ function doClearSection(){
   else if(s==='weights'){d.weights={};saveData(d);}
   else if(s==='sb'){
     if(d.weights)Object.keys(d.weights).forEach(u=>{if(d.weights[u])d.weights[u].sb=null;});
+    saveData(d);
+  } else if(s==='pb'){
+    if(d.weights)Object.keys(d.weights).forEach(u=>{if(d.weights[u])d.weights[u].pb=null;});
     saveData(d);
   } else if(s==='calendar'){localStorage.removeItem('cal_entries_v1');}
   else if(s==='bodystats'){localStorage.removeItem('body_stats_v1');}
@@ -8290,8 +8533,14 @@ function openTips(day,groupId,altIdx,u){
         <span class="ex-stats-since" id="tips-pb-date">${pbSinceTxt}</span>
       </div>
     </div>
-    ${restSec>0?`<button class="rest-btn ex-timer-circle" onclick="startTimer(${restSec},'${safeName}','${u}','${day}','${groupId}',${altIdx})"><span class="etc-icon">⏱️</span><span class="etc-time">${restLabel(restSec)}</span></button>`:''}`;
+    ${restSec>0?`<button class="rest-btn ex-timer-circle" id="rest-btn-tips-${u}" onclick="startTimer(${restSec},'${safeName}','${u}','${day}','${groupId}',${altIdx})"><span class="etc-icon">⏱️</span><span class="etc-time">${restLabel(restSec)}</span></button>`:''}`;
   renderSetCounter();
+  // if a timer is already running for this exercise, the button should show
+  // highlighted from the moment Tips opens, not just when a new timer starts
+  if(activeTimers[u]){
+    const rbTips=document.getElementById('rest-btn-tips-'+u);
+    if(rbTips)rbTips.classList.add('active');
+  }
 
   // hide input row initially
   const inputRow=document.getElementById('tips-input-row');
@@ -8328,7 +8577,20 @@ function openTips(day,groupId,altIdx,u){
 function openTipsYoutube(){
   const btn=document.getElementById('tips-yt-btn');
   const url=btn?.dataset.url;
-  if(url)window.open(url,'_blank');
+  if(!url)return;
+  // In an iOS Home Screen (standalone) PWA, window.open(url,'_blank') creates an
+  // empty in-app browser view with no address — the "Search or enter website
+  // name" screen — and you have to dismiss it manually to get back. Clicking a
+  // real anchor element instead hands the URL to Safari properly, so returning
+  // via the app switcher lands straight back on the workout.
+  const a=document.createElement('a');
+  a.href=url;
+  a.target='_blank';
+  a.rel='noopener noreferrer';
+  a.style.display='none';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(()=>a.remove(),0);
 }
 
 function openTipsInput(){
@@ -8473,7 +8735,15 @@ requestWakeLock();
 // the FIRST timer of a session fails to schedule its ntfy notification because
 // the wake-up delay eats into (or exceeds) the timer's own rest duration.
 function wakeServer(){
-  fetch('https://training-push-server.onrender.com/health').catch(()=>{});
+  // A single ping isn't enough: if Render is cold, this request itself fails
+  // while the instance boots. Retrying until it answers means the server is
+  // usually already warm by the time the first rest timer is started.
+  const ping=(tries)=>{
+    fetch('https://training-push-server.onrender.com/health')
+      .then(r=>{if(!r.ok&&tries>0)setTimeout(()=>ping(tries-1),5000)})
+      .catch(()=>{if(tries>0)setTimeout(()=>ping(tries-1),5000)});
+  };
+  ping(10);
 }
 wakeServer();
 initBottomNavs();
@@ -8629,20 +8899,40 @@ async function requestWakeLock(){
 const NTFY_TOPIC='training-app-by-zaza';
 const NTFY_URL='https://ntfy.sh/'+NTFY_TOPIC;
 
+let ntfyGeneration=0;
+
 function scheduleNtfyNotification(delayMs,name){
-  // Send to Render server which will fire ntfy after delayMs
-  fetch('https://training-push-server.onrender.com/schedule-ntfy',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      delayMs:Math.round(delayMs),
-      topic:NTFY_TOPIC,
-      name:name||'exercise'
-    })
-  }).catch(()=>{});
+  const myGen=++ntfyGeneration;
+  const fireAt=Date.now()+delayMs;// absolute target, so retries stay accurate
+  // Render's free tier sleeps after inactivity and can take 30–50s to wake. The
+  // first schedule request of a session often lands while the server is still
+  // cold-starting, and a single .catch() swallowed that failure — which is why
+  // the first notification after opening the app never arrived. Retrying with
+  // backoff covers the wake-up window.
+  const attempt=(tries)=>{
+    // a newer timer started, or this one was cancelled — abandon these retries
+    if(myGen!==ntfyGeneration)return;
+    const remaining=fireAt-Date.now();
+    if(remaining<=500)return;// too late to be useful; the in-app beep covers it
+    fetch('https://training-push-server.onrender.com/schedule-ntfy',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        delayMs:Math.round(remaining),// recomputed, not the original delay
+        topic:NTFY_TOPIC,
+        name:name||'exercise'
+      })
+    }).then(r=>{
+      if(!r.ok&&tries>0)setTimeout(()=>attempt(tries-1),4000);
+    }).catch(()=>{
+      if(tries>0)setTimeout(()=>attempt(tries-1),4000);
+    });
+  };
+  attempt(12);// ~48s of retry coverage, matching worst-case cold start
 }
 
 function cancelNtfyNotification(){
+  ntfyGeneration++;// invalidates any retry still queued for the old timer
   fetch('https://training-push-server.onrender.com/cancel-ntfy',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
