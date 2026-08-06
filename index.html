@@ -5822,11 +5822,14 @@ let badgesBooting=false;
 // ══════════════════════════════════════════
 let pendingTrophyCelebrations=[];
 function getTrophyMilestones(){
+  // computed fresh from BADGES.length every call, so adding/removing badges in
+  // the future automatically shifts these thresholds — nothing is hardcoded
+  const total=BADGES.length;
   return[
-    {id:'bronze',threshold:10,emoji:'🥉',name:'Bronze Rank',shortName:'Bronze',colors:['#cd7f32','#a86428','#e8a869','#b5651d']},
-    {id:'silver',threshold:25,emoji:'🥈',name:'Silver Rank',shortName:'Silver',colors:['#c0c0c0','#9a9a9a','#e8e8e8','#b0b0b0']},
-    {id:'gold',threshold:50,emoji:'🥇',name:'Gold Rank',shortName:'Gold',colors:['#ffd700','#e6b800','#fff2a8','#d4af00']},
-    {id:'champion',threshold:BADGES.length,emoji:'🏆',name:'Champion Rank',shortName:'Champion',colors:['#cd7f32','#c0c0c0','#ffd700','#e8e8e8']},
+    {id:'bronze',threshold:Math.round(total*0.25),emoji:'🥉',name:'Bronze Rank',shortName:'Bronze',colors:['#cd7f32','#a86428','#e8a869','#b5651d']},
+    {id:'silver',threshold:Math.round(total*0.50),emoji:'🥈',name:'Silver Rank',shortName:'Silver',colors:['#c0c0c0','#9a9a9a','#e8e8e8','#b0b0b0']},
+    {id:'gold',threshold:Math.round(total*0.75),emoji:'🥇',name:'Gold Rank',shortName:'Gold',colors:['#ffd700','#e6b800','#fff2a8','#d4af00']},
+    {id:'champion',threshold:total,emoji:'🏆',name:'Champion Rank',shortName:'Champion',colors:['#cd7f32','#c0c0c0','#ffd700','#e8e8e8']},
   ];
 }
 function getTrophiesSeen(){return loadData().trophiesSeen||{}}
@@ -5855,7 +5858,7 @@ function checkTrophies(unlockedCount){
 // visual width. A plain linear scale would put the trophies at odd positions.
 function badgeCountToBarPct(count){
   const ms=getTrophyMilestones();
-  const stops=[0,...ms.map(m=>m.threshold)];// [0, 10, 25, 50, ALL]
+  const stops=[0,...ms.map(m=>m.threshold)];// [0, 25%, 50%, 75%, 100% of total]
   for(let i=1;i<stops.length;i++){
     if(count<=stops[i]){
       const segStart=stops[i-1],segEnd=stops[i];
